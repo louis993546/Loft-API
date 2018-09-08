@@ -1,4 +1,4 @@
-# Specification
+# Specification (v1)
 
 This folder contains all the necessary details of the Loft REST API.
 
@@ -6,47 +6,79 @@ This folder contains all the necessary details of the Loft REST API.
 
 - Follow rules from [JSON API](http://jsonapi.org/) v1.0 Stable
 
-## Sign in to a loft
+## Loft
+
+### Add a new loft (along with a new user)
 
 Method: `POST`
-Endpoint: `/loft/?`
-Body: ?
 
-## Sign out of a loft
+Endpoint: `/loft/`
 
-Method: `POST`
-Endpoint: `/loft/?`
-Body: ?
+Params: None
 
-## Get to-do list of a loft
+Body: [JSON sample](request/post-loft.json)
 
-Method: `POST`
+The body consists of
+
+- `loft`: the loft that the user is trying to create
+- `user`: the user that is creating the loft.
+
+TODO: user needs some kind of authentication data (password-like)
+
+Response: [JSON sample](response/post-loft.json)
+
+## To-Do list
+
+### Get tasks
+
+Method: `GET`
+
 Endpoint: `/loft/{loft_id}/todos`
-```
-{
-    "data": [
-        {
-            "type": "todo",
-            "id": "some uuid",
-            "attributes": {
-                "name": "blah blah blah blah"
-            }
-        }
-    ]
-}
-```
 
-## Add an item to to-do list of a loft
+Params: TODO
+
+Body: None
+
+Response: [JSON sample](response/get-todo.json)
+
+TODO: authentication token missing, pagination
+
+### Add a task
 
 Method: `POST`
-Endpoint: `/loft/{loft_id}/todos`
-Body:
-```
-{
-    "task": {
-        "name": ""
-    }
-}
-```
 
-Response: TODO
+Endpoint: `/loft/{loft_id}/todos`
+
+Params: None
+
+Body: [JSON sample](request/post-todos.json)
+
+Response: [JSON sample](response/post-todos.json)
+
+TODO: authentication token missing
+
+## Update a task
+
+Method: `PUT`
+
+Endpoint: `/loft/{loft_id}/todos/{task_id}`
+
+Params: None
+
+Body: [JSON sample](request/put-todos.json)
+
+Response: [JSON sample](response/put-todos.json)
+
+TODO: authentication token missing
+
+## Delete a task
+
+Method: `DELETE`
+
+Endpoint: `loft/{loft_id}/todos/{task_id}`
+
+Params: None
+
+Body: None
+
+Response: [JSON sample](response/delete-todos.json)
