@@ -1,0 +1,19 @@
+{
+  "data": [
+    {
+      "type": "loft",
+      "id": "e65fe90a-590f-4ba6-9be5-0e41df5af838",
+      "attributes": {
+        "name": "Something something"
+      }
+    },
+    {
+      "type": "user",
+      "id": "85b54a8e-33c0-4817-8e73-ba4f49fd7b4e",
+      "attributes": {
+        "name": "Louis",
+        "admin": true
+      }
+    }
+  ]
+}

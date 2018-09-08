@@ -1,0 +1,20 @@
+{
+  "data": [
+    {
+      "type": "roommate",
+      "id": "77855b59-1264-4f87-9611-89db17d09caf",
+      "attributes": {
+        "name": "A",
+        "join-on": "2018-01-01"
+      }
+    },
+    {
+      "type": "roommate",
+      "id": "77855b59-1264-4f87-9611-89db17d09caf",
+      "attributes": {
+        "name": "B",
+        "join-on": "2018-01-02"
+      }
+    },
+  ]
+}

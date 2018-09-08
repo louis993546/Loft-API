@@ -1,7 +1,7 @@
 {
   "data": [
     {
-      "type": "todo",
+      "type": "task",
       "id": "0c7bc8be-321f-47af-92ab-8a379981c64b",
       "attributes": {
         "name": "Contact landlord to fix the sink",
@@ -9,7 +9,7 @@
       }
     },
     {
-      "type": "todo",
+      "type": "task",
       "id": "0c7bc8be-321f-47af-92ab-8a379981c64a",
       "attributes": {
         "name": "Contact landlord to fix the stove",
@@ -18,7 +18,7 @@
       }
     },
     {
-      "type": "todo",
+      "type": "task",
       "id": "0c7bc8be-321f-47af-92ab-8a379981c64v",
       "attributes": {
         "name": "Contact landlord to fix the tub",

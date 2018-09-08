@@ -39,7 +39,7 @@ Params: TODO
 
 Body: None
 
-Response: [JSON sample](response/get-todo.json)
+Response: [JSON sample](response/get-todos.json)
 
 TODO: authentication token missing, pagination
 
