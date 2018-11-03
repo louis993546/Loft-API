@@ -72,6 +72,31 @@ paths:
                           type: string
                     user:
                       type: object
+  /loft/{loftId}:
+    get:
+    put:
+    patch:
+  /loft/{loftId}/requests:
+    post:
+    get:
+  /loft/{loftId}/notes:
+    get:
+    post:
+  /loft/{loftId}/notes/{noteId}:
+    get:
+    put:
+    patch:
+  /loft/{loftId}/tasks:
+    get:
+    post:
+  /loft/{loftId}/tasks/{taskId}:
+    get:
+    put:
+    patch:
+  /loft/{loftId}/members:
+    get:
+  /loft/{loftId}/members/{memberId}:
+    get:
 externalDocs:
   description: API GitHub Repository
   url: https://github.com/louistsaitszho/loft-API
