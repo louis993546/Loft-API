@@ -22,7 +22,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Echo"
+                $ref: '#/components/schemas/Echo'
               example:
                 message: '2018-01-01T00:00:00-00:00'
   /status:
@@ -65,6 +65,9 @@ paths:
       responses:
         200:
           description: Fetch loft information successfully
+          content:
+            application/json:
+              $ref: '#/components/schemas/Loft'
         401:
           description: Authentication not found (i.e. don't even know who you are)
         403:
@@ -72,7 +75,7 @@ paths:
         404:
           description: Loft not found
     patch:
-      summary: Get information about a loft
+      summary: Update information about a loft
       responses:
         200:
           description: Patch loft information successfully
@@ -168,6 +171,8 @@ components:
         id:
           type: string
           format: uuid
+        join_code:
+          type: string
     Member:
       type: object
       properties:
