@@ -1,0 +1,17 @@
+{
+  "name": "mockserver",
+  "version": "1.0.0",
+  "description": "- This will allow me to test the client very quickly on the json structure - Powered by [json-server](https://github.com/typicode/json-server)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "startJson": "json-server index.json",
+    "startJs": "json-server index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "faker": "^4.1.0",
+    "lodash": "^4.17.11"
+  }
+}
