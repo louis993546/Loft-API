@@ -1,0 +1,6 @@
+{
+    "error": {
+        "status": "4XX",
+        "title": "Not a JSON/API request"
+    }
+}

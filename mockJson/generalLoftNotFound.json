@@ -1,0 +1,9 @@
+{
+    "error": [
+        {
+            "status": "404",
+            "title": "Cannot find the loft you are specifiying",
+            "code": "404_LOFT_NOT_FOUND"
+        }
+    ]
+}
