@@ -24,30 +24,94 @@ type ErrorResponse struct {
 func responseError404LoftNotFound() []ErrorResponseObject {
 	return []ErrorResponseObject{
 		ErrorResponseObject{
-			Status: "200",
-			Title:  "Test",
-			Code:   "404_NOTHING_NOT_FOUND",
+			Status: "404",
+			Title:  "Cannot find the loft you are specifying",
+			Code:   "404_LOFT_NOT_FOUND",
+		},
+	}
+}
+
+func responseError404NoteNotFound() []ErrorResponseObject {
+	return []ErrorResponseObject{
+		ErrorResponseObject{
+			Status: "404",
+			Title:  "Cannot find the note you are specifying",
+			Code:   "404_NOTE_NOT_FOUND",
+		},
+	}
+}
+
+func responseError404TaskNotFound() []ErrorResponseObject {
+	return []ErrorResponseObject{
+		ErrorResponseObject{
+			Status: "404",
+			Title:  "Cannot find the task you are specifying",
+			Code:   "404_TASK_NOT_FOUND",
+		},
+	}
+}
+
+func responseError404EventNotFound() []ErrorResponseObject {
+	return []ErrorResponseObject{
+		ErrorResponseObject{
+			Status: "404",
+			Title:  "Cannot find the event you are specifying",
+			Code:   "404_EVENT_NOT_FOUND",
+		},
+	}
+}
+
+func responseError404MemberNotFound() []ErrorResponseObject {
+	return []ErrorResponseObject{
+		ErrorResponseObject{
+			Status: "404",
+			Title:  "Cannot find the member you are specifying",
+			Code:   "404_Member_NOT_FOUND",
 		},
 	}
 }
 
 func main() {
-	fmt.Println("starting")
+	port := 8080
 
+	fmt.Printf("localhost:%d should be up\n", port)
+
+	//setup
 	r := mux.NewRouter()
 	r.Use(commonMiddleware)
+
+	//routing
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		// fmt.Println("Get something")
 		error := responseError404LoftNotFound()
 
 		json.NewEncoder(w).Encode(error)
 	})
+
+	r.HandleFunc("/lofts", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintln(w, "POST lofts seems to be working")
+	}).Methods("POST")
+
+	r.HandleFunc("/notes", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintln(w, "POST notes seems to be working")
+	}).Methods("POST")
+
+	r.HandleFunc("/tasks", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintln(w, "POST tasks seems to be working")
+	}).Methods("POST")
+
+	r.HandleFunc("/events", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintln(w, "POST events seems to be working")
+	}).Methods("POST")
+
+	r.HandleFunc("/members", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintln(w, "POST members seems to be working")
+	}).Methods("POST")
+
+	//start listening
 	error := http.ListenAndServe(":8080", r)
 	if error != nil {
 		fmt.Println("Something went wrong")
 	}
-
-	fmt.Println("ending")
 }
 
 // commonMiddleware adds a bunch of commonly use stuff into the router
