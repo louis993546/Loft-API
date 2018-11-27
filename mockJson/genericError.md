@@ -1,3 +1,8 @@
+# Generic errors
+
+## loft not found
+
+```json
 {
     "error": [
         {
@@ -7,3 +12,20 @@
         }
     ]
 }
+```
+
+## task not found
+
+(ditto)
+
+## event not found
+
+(ditto)
+
+## member not found
+
+(ditto)
+
+## note not found
+
+(ditto)
