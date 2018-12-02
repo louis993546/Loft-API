@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -19,6 +20,12 @@ type ErrorResponseObject struct {
 // ErrorResponse is what JSONAPI wants to see when application wants to return error
 type ErrorResponse struct {
 	Errors []ErrorResponseObject `json:"errors"`
+}
+
+// TimeResponse TODO: this is pretty self-explainatory so what should i write?
+type TimeResponse struct {
+	Time   string `json:"time"`
+	Format string `json:"format"`
 }
 
 func responseError404LoftNotFound() []ErrorResponseObject {
@@ -81,11 +88,10 @@ func main() {
 	r.Use(commonMiddleware)
 
 	//routing
-	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		error := responseError404LoftNotFound()
-
-		json.NewEncoder(w).Encode(error)
-	})
+	r.HandleFunc("/echo", func(w http.ResponseWriter, r *http.Request) {
+		timeNow := TimeResponse{time.Now().UTC().Format(time.RFC3339), "RFC3339"}
+		json.NewEncoder(w).Encode(timeNow)
+	}).Methods("GET", "PUT", "POST", "DELETE", "PATCH")
 
 	r.HandleFunc("/lofts", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "POST lofts seems to be working")
@@ -108,7 +114,7 @@ func main() {
 	}).Methods("POST")
 
 	//start listening
-	error := http.ListenAndServe(":8080", r)
+	error := http.ListenAndServe(fmt.Sprintf(":%d", port), r)
 	if error != nil {
 		fmt.Println("Something went wrong")
 	}
@@ -116,11 +122,13 @@ func main() {
 
 // commonMiddleware adds a bunch of commonly use stuff into the router
 // - Content-Type: application/vnd.api+json
-// - [TODO] logger
+// - logger
+// TODO: refactor this to take multiple middleware to avoid adding way too many stuff in here
 func commonMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		//logging
-		log.Println(r.URL)
+		// log.Println(r.URL)
+		log.Printf("req = '%s'\n", r.URL.String())
 
 		//content type
 		w.Header().Add("Content-Type", "application/vnd.api+json")
