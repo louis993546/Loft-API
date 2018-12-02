@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS note(
     loft_id uuid REFERENCES loft(id),
     creator_id uuid REFERENCES member(id),
     created_at timestamptz DEFAULT NOW(),
-    format noteformat,
+    format noteformat DEFAULT 'COMMON_MARK_V_0_28',
     content text
 );
 

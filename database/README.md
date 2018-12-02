@@ -38,3 +38,24 @@ All the basics of the database
 - `message`
   - `id`
   - `loft_id`
+
+## Useful commands
+
+### In command line
+
+- `sudo -u postgres -i`
+  - go to some kind of interactive mode as user `postgres`
+- `sudo -u postgres {command}`
+  - execute command as user `postgres`
+- `postgres --version`
+- `pg_dump -s {table name} > {output file name}`
+  - dump the whole db into a kind of query
+- `psql {table name}`
+  - enter `psql` to a specific table
+
+### In `psql`
+
+- `\dt`
+  - list of tables
+- `SELECT version();`
+  - list version of postgres
