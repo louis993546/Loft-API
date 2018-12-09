@@ -8,4 +8,4 @@ WORKDIR /loft/api
 
 RUN go build
 
-CMD ["loft"]
+CMD ["./loft"]
