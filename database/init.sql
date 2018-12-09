@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS member(
     FOREIGN KEY (approved_by_member_id) REFERENCES member(id)
 );
 
+-- TODO: make this one a table instead
 CREATE TYPE noteformat AS ENUM ('COMMON_MARK_V_0_28');
 
 CREATE TABLE IF NOT EXISTS note(
@@ -56,6 +57,7 @@ CREATE TABLE IF NOT EXISTS event(
     title	text
 );
 
+-- TODO: make this one a table instead
 CREATE TYPE messagetype AS ENUM('TEXT', 'IMAGE_REF');
 
 CREATE TABLE IF NOT EXISTS message(
