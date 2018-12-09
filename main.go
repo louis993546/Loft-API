@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -9,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	_ "github.com/lib/pq"
 )
 
 // TimeResponse contains time in string + format that the time string is in.
@@ -19,8 +21,13 @@ type TimeResponse struct {
 
 func main() {
 	port := os.Getenv("PORT")
+	// TODO: default port?
 
-	fmt.Printf("localhost:%s should be up\n", port)
+	dbConnectionString := os.Getenv("DATABASE_URL")
+	_, err := sql.Open("postgres", dbConnectionString)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	//setup
 	r := mux.NewRouter()
@@ -56,6 +63,7 @@ func main() {
 	}).Methods("POST")
 
 	//start listening
+	fmt.Printf("localhost:%s should be up\n", port)
 	error := http.ListenAndServe(fmt.Sprintf(":%s", port), r)
 	if error != nil {
 		fmt.Println("Something went wrong")
