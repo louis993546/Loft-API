@@ -9,12 +9,13 @@
 
 ### Just GO
 
+This project is using go module from 1.10
+
 1. Make sure Go is setup correctly
-2. `go get github.com/gorilla/mux`
-3. build and run in the way you want
+2. build and run in the way you want
    - `go install` + `loft`
    - `go run main.go`
-   - `go build` + `$GOPATH/bin/loft`
+   - `go build` + `loft`
 
 ### Docker
 
