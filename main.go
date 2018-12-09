@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -79,9 +80,9 @@ func responseError404MemberNotFound() []ErrorResponseObject {
 }
 
 func main() {
-	port := 8080
+	port := os.Getenv("PORT")
 
-	fmt.Printf("localhost:%d should be up\n", port)
+	fmt.Printf("localhost:%s should be up\n", port)
 
 	//setup
 	r := mux.NewRouter()
@@ -114,7 +115,7 @@ func main() {
 	}).Methods("POST")
 
 	//start listening
-	error := http.ListenAndServe(fmt.Sprintf(":%d", port), r)
+	error := http.ListenAndServe(fmt.Sprintf(":%s", port), r)
 	if error != nil {
 		fmt.Println("Something went wrong")
 	}
