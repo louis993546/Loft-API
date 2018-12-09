@@ -54,3 +54,13 @@ At some point this section will be integrated into the build section, but right 
 1. [Install psql to your machine](https://www.postgresql.org/download/)
 2. Setup user?
 3. Init schema
+
+## Publish image
+
+1. `docker login` if necessary
+2. build the docker image (see [above](#docker))
+3. `docker tag api-loft:{version name} louis993546/loft:{version name}`
+4. `docker push louis993546/loft:{version name}`
+   This will take a while
+
+For more info, check [the official documentation](https://docs.docker.com/docker-cloud/builds/push-images/)
