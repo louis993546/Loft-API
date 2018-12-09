@@ -11,72 +11,10 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// ErrorResponseObject is a representation of a generic error object in this API, following JSONAPI specification
-type ErrorResponseObject struct {
-	Status string `json:"status"`
-	Title  string `json:"title"`
-	Code   string `json:"code"`
-}
-
-// ErrorResponse is what JSONAPI wants to see when application wants to return error
-type ErrorResponse struct {
-	Errors []ErrorResponseObject `json:"errors"`
-}
-
-// TimeResponse TODO: this is pretty self-explainatory so what should i write?
+// TimeResponse contains time in string + format that the time string is in.
 type TimeResponse struct {
 	Time   string `json:"time"`
 	Format string `json:"format"`
-}
-
-func responseError404LoftNotFound() []ErrorResponseObject {
-	return []ErrorResponseObject{
-		ErrorResponseObject{
-			Status: "404",
-			Title:  "Cannot find the loft you are specifying",
-			Code:   "404_LOFT_NOT_FOUND",
-		},
-	}
-}
-
-func responseError404NoteNotFound() []ErrorResponseObject {
-	return []ErrorResponseObject{
-		ErrorResponseObject{
-			Status: "404",
-			Title:  "Cannot find the note you are specifying",
-			Code:   "404_NOTE_NOT_FOUND",
-		},
-	}
-}
-
-func responseError404TaskNotFound() []ErrorResponseObject {
-	return []ErrorResponseObject{
-		ErrorResponseObject{
-			Status: "404",
-			Title:  "Cannot find the task you are specifying",
-			Code:   "404_TASK_NOT_FOUND",
-		},
-	}
-}
-
-func responseError404EventNotFound() []ErrorResponseObject {
-	return []ErrorResponseObject{
-		ErrorResponseObject{
-			Status: "404",
-			Title:  "Cannot find the event you are specifying",
-			Code:   "404_EVENT_NOT_FOUND",
-		},
-	}
-}
-
-func responseError404MemberNotFound() []ErrorResponseObject {
-	return []ErrorResponseObject{
-		ErrorResponseObject{
-			Status: "404",
-			Title:  "Cannot find the member you are specifying",
-			Code:   "404_Member_NOT_FOUND",
-		},
-	}
 }
 
 func main() {
@@ -89,6 +27,9 @@ func main() {
 	r.Use(commonMiddleware)
 
 	//routing
+	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintln(w, "Serve up a swagger UI")
+	})
 	r.HandleFunc("/echo", func(w http.ResponseWriter, r *http.Request) {
 		timeNow := TimeResponse{time.Now().UTC().Format(time.RFC3339), "RFC3339"}
 		json.NewEncoder(w).Encode(timeNow)
