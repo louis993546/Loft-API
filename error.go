@@ -1,4 +1,4 @@
-package error
+package main
 
 // ErrorResponseObject is a representation of a generic error object in this API, following JSONAPI specification
 type ErrorResponseObject struct {

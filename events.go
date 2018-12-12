@@ -8,3 +8,7 @@ import (
 func PostEvents(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "POST events seems to be working")
 }
+
+func GetEvents(w http.ResponseWriter, r *http.Request) {
+
+}

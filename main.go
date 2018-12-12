@@ -34,18 +34,21 @@ func main() {
 	r.HandleFunc("/echo", AllEcho).Methods("GET", "PUT", "POST", "DELETE", "PATCH")
 	r.HandleFunc("/lofts", PostLofts).Methods("POST")
 	r.HandleFunc("/notes", PostNotes).Methods("POST")
+	r.HandleFunc("/notes", GetNotes).Methods("GET")
 	r.HandleFunc("/tasks", PostTasks).Methods("POST")
+	r.HandleFunc("/tasks", GetTasks).Methods("GET")
 	r.HandleFunc("/events", PostEvents).Methods("POST")
-
-	r.HandleFunc("/members", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, "POST members seems to be working")
-	}).Methods("POST")
+	r.HandleFunc("/events", GetEvents).Methods("GET")
+	r.HandleFunc("/members", PostMembers).Methods("POST")
+	r.HandleFunc("/members", GetMembers).Methods("GET")
+	r.HandleFunc("/loft_joining_requests", PostLoftJoiningRequests).Methods("POST")
+	r.HandleFunc("/loft_joining_requests", GetLoftJoiningRequests).Methods("GET")
 
 	//start listening
 	fmt.Printf("localhost:%s should be up\n", port)
 	error := http.ListenAndServe(fmt.Sprintf(":%s", port), r)
 	if error != nil {
-		fmt.Println("Something went wrong")
+		log.Fatal(error)
 	}
 }
 

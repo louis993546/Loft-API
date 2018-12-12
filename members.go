@@ -8,3 +8,7 @@ import (
 func PostMembers(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "POST members seems to be working")
 }
+
+func GetMembers(w http.ResponseWriter, r *http.Request) {
+
+}
