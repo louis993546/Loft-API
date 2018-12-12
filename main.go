@@ -2,61 +2,40 @@ package main
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 )
 
-// TimeResponse contains time in string + format that the time string is in.
-type TimeResponse struct {
-	Time   string `json:"time"`
-	Format string `json:"format"`
-}
-
 func main() {
 	port := os.Getenv("PORT")
-	// TODO: default port?
+	if len(port) <= 0 {
+		log.Println("No PORT from env, will try to use :8080 instead")
+		port = "8080" //default port, not garuntee to be avilable
+	}
 
 	dbConnectionString := os.Getenv("DATABASE_URL")
 	_, err := sql.Open("postgres", dbConnectionString)
+	//TODO: should I defer db.close?
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	//setup
 	r := mux.NewRouter()
-	r.Use(commonMiddleware)
+	r.Use(SetJSONAPIContentTypeMiddleware, LogRequestMiddleware)
 
 	//routing
-	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, "Serve up a swagger UI")
-	})
-	r.HandleFunc("/echo", func(w http.ResponseWriter, r *http.Request) {
-		timeNow := TimeResponse{time.Now().UTC().Format(time.RFC3339), "RFC3339"}
-		json.NewEncoder(w).Encode(timeNow)
-	}).Methods("GET", "PUT", "POST", "DELETE", "PATCH")
-
-	r.HandleFunc("/lofts", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, "POST lofts seems to be working")
-	}).Methods("POST")
-
-	r.HandleFunc("/notes", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, "POST notes seems to be working")
-	}).Methods("POST")
-
-	r.HandleFunc("/tasks", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, "POST tasks seems to be working")
-	}).Methods("POST")
-
-	r.HandleFunc("/events", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, "POST events seems to be working")
-	}).Methods("POST")
+	r.HandleFunc("/", home).Methods("GET")
+	r.HandleFunc("/echo", AllEcho).Methods("GET", "PUT", "POST", "DELETE", "PATCH")
+	r.HandleFunc("/lofts", PostLofts).Methods("POST")
+	r.HandleFunc("/notes", PostNotes).Methods("POST")
+	r.HandleFunc("/tasks", PostTasks).Methods("POST")
+	r.HandleFunc("/events", PostEvents).Methods("POST")
 
 	r.HandleFunc("/members", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "POST members seems to be working")
@@ -70,20 +49,6 @@ func main() {
 	}
 }
 
-// commonMiddleware adds a bunch of commonly use stuff into the router
-// - Content-Type: application/vnd.api+json
-// - logger
-// TODO: refactor this to take multiple middleware to avoid adding way too many stuff in here
-func commonMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		//logging
-		// log.Println(r.URL)
-		log.Printf("req = '%s'\n", r.URL.String())
-
-		//content type
-		w.Header().Add("Content-Type", "application/vnd.api+json")
-
-		//ends
-		next.ServeHTTP(w, r)
-	})
+func home(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Serve up a swagger UI")
 }
