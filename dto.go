@@ -1,6 +1,10 @@
 package main
 
-import "time"
+import (
+	"encoding/json"
+	"net/http"
+	"time"
+)
 
 // TODO: this should not be package main
 // This package contains all the DTO for the project
@@ -95,16 +99,65 @@ type relationshipWithLoft struct {
 	Loft dataOfLoft `json:"loft"`
 }
 
-// /<loft>
-// TODO: join request?
+// <loft>
+// <loft_joining_request>
 
-// ---------------------test code below---------------------
-
-type postNoteRequest struct {
-	Data         dataOfNote           `json:"data"`
-	Relationship relationshipWithLoft `json:"relationship"`
+type attributeOfLoftJoiningRequest struct {
 }
 
+type dataOfLoftJoiningRequest struct {
+	Type       string                        `json:"type"` //this should always be "loft"
+	ID         string                        `json:"id"`
+	Attributes attributeOfLoftJoiningRequest `json:"attributes"`
+}
+
+// </join_request>
+
+// ---------------------DTO Factories----------------------
 // http://www.golangpatterns.info/object-oriented/constructors
-// func PostNoteRequest() postNoteRequest {
-// }
+
+type noteDto struct {
+	Data         dataOfNote
+	Relationship relationshipWithLoft
+}
+
+// NewNoteDto is a test fx
+func NewNoteDto(id string) *noteDto {
+	attribute := new(attributeOfNote)
+	attribute.Content = "content"
+	attribute.CreatedAt = time.Now()
+	attribute.Description = "more parameter in the function"
+	attribute.Title = "more parameter in the function"
+
+	data := new(dataOfNote)
+	data.ID = id
+	data.Type = "note"
+	data.Attributes = *attribute
+
+	loftAttribute := new(attributeOfLoft)
+	loftAttribute.Name = ""
+
+	loft := new(dataOfLoft)
+	loft.ID = ""
+	loft.Type = "loft"
+	loft.Attributes = *loftAttribute
+
+	relationship := new(relationshipWithLoft)
+	relationship.Loft = *loft
+
+	note := new(noteDto)
+	note.Data = *data
+	note.Relationship = *relationship
+
+	return note
+}
+
+// ParseCreateNoteRequest is a test fx
+func ParseCreateNoteRequest(sth http.Request) (*noteDto, error) {
+	var note noteDto
+	err := json.NewDecoder(sth.Body).Decode(&note)
+	if err != nil {
+		return nil, err
+	}
+	return &note, nil
+}
