@@ -3,7 +3,6 @@
 ## Ground rules
 
 - Specification in OpenAPI 3.0.2
-- Structure follows JSONAPI 1.0 STABLE
 
 ## Structure
 
@@ -64,3 +63,8 @@ At some point this section will be integrated into the build section, but right 
    This will take a while
 
 For more info, check [the official documentation](https://docs.docker.com/docker-cloud/builds/push-images/)
+
+## Timeline
+
+- 2018/12/19
+  - "Structure the DTO by following JSON API" has been scratted, due to the fact that it adds way too many extra hurdles to client side.
