@@ -12,12 +12,3 @@ func LogRequestMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
-
-// SetJSONAPIContentTypeMiddleware set the Content-Type to application/vnd.api+json, as specified in
-// the JSON API specification
-func SetJSONAPIContentTypeMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Add("Content-Type", "application/vnd.api+json")
-		next.ServeHTTP(w, r)
-	})
-}

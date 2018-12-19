@@ -5,6 +5,7 @@ import (
 	"net/http"
 )
 
+// PostNotes creates a note for the loft
 func PostNotes(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "POST notes seems to be working")
 }

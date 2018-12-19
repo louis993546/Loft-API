@@ -12,7 +12,7 @@ type TimeResponse struct {
 	Format string `json:"format"`
 }
 
-// AllEcho handles GET/PUT/POST/PATCH/DELETE echo/ by returning the server time
+// AllEcho handles GET/PUT/POST/PATCH/DELETE /echo by returning the server time
 // It's useful for anyone to check if the server is online
 func AllEcho(w http.ResponseWriter, r *http.Request) {
 	timeNow := TimeResponse{time.Now().UTC().Format(time.RFC3339), "RFC3339"}

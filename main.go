@@ -27,7 +27,7 @@ func main() {
 
 	//setup
 	r := mux.NewRouter()
-	r.Use(SetJSONAPIContentTypeMiddleware, LogRequestMiddleware)
+	r.Use(LogRequestMiddleware)
 
 	//routing
 	r.HandleFunc("/", home).Methods("GET")
