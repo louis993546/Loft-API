@@ -70,8 +70,9 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Loft func(childComplexity int) int
-		Echo func(childComplexity int) int
+		Lofts func(childComplexity int) int
+		Loft  func(childComplexity int, id string) int
+		Echo  func(childComplexity int) int
 	}
 
 	Request struct {
@@ -83,6 +84,7 @@ type ComplexityRoot struct {
 	Task struct {
 		Id    func(childComplexity int) int
 		Title func(childComplexity int) int
+		State func(childComplexity int) int
 	}
 }
 
@@ -92,7 +94,8 @@ type MutationResolver interface {
 	CreateRequest(ctx context.Context, input NewRequest) (Request, error)
 }
 type QueryResolver interface {
-	Loft(ctx context.Context) ([]Loft, error)
+	Lofts(ctx context.Context) ([]Loft, error)
+	Loft(ctx context.Context, id string) (Loft, error)
 	Echo(ctx context.Context) (*Echo, error)
 }
 
@@ -137,6 +140,21 @@ func field_Mutation_createRequest_args(rawArgs map[string]interface{}) (map[stri
 		}
 	}
 	args["input"] = arg0
+	return args, nil
+
+}
+
+func field_Query_loft_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["id"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalID(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
 	return args, nil
 
 }
@@ -319,12 +337,24 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateRequest(childComplexity, args["input"].(NewRequest)), true
 
+	case "Query.lofts":
+		if e.complexity.Query.Lofts == nil {
+			break
+		}
+
+		return e.complexity.Query.Lofts(childComplexity), true
+
 	case "Query.loft":
 		if e.complexity.Query.Loft == nil {
 			break
 		}
 
-		return e.complexity.Query.Loft(childComplexity), true
+		args, err := field_Query_loft_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Loft(childComplexity, args["id"].(string)), true
 
 	case "Query.echo":
 		if e.complexity.Query.Echo == nil {
@@ -367,6 +397,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Task.Title(childComplexity), true
+
+	case "Task.state":
+		if e.complexity.Task.State == nil {
+			break
+		}
+
+		return e.complexity.Task.State(childComplexity), true
 
 	}
 	return 0, false
@@ -1195,6 +1232,15 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
+		case "lofts":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_lofts(ctx, field)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
 		case "loft":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -1226,7 +1272,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Query_loft(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+func (ec *executionContext) _Query_lofts(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -1238,7 +1284,7 @@ func (ec *executionContext) _Query_loft(ctx context.Context, field graphql.Colle
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Loft(rctx)
+		return ec.resolvers.Query().Lofts(rctx)
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -1283,6 +1329,40 @@ func (ec *executionContext) _Query_loft(ctx context.Context, field graphql.Colle
 	}
 	wg.Wait()
 	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Query_loft(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Query_loft_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Loft(rctx, args["id"].(string))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(Loft)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._Loft(ctx, field.Selections, &res)
 }
 
 // nolint: vetshadow
@@ -1523,6 +1603,11 @@ func (ec *executionContext) _Task(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "state":
+			out.Values[i] = ec._Task_state(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1586,6 +1671,33 @@ func (ec *executionContext) _Task_title(ctx context.Context, field graphql.Colle
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Task_state(ctx context.Context, field graphql.CollectedField, obj *Task) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Task",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.State, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(TaskState)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
 }
 
 var __DirectiveImplementors = []string{"__Directive"}
@@ -3045,6 +3157,12 @@ func UnmarshalNewEvent(v interface{}) (NewEvent, error) {
 			if err != nil {
 				return it, err
 			}
+		case "loftId":
+			var err error
+			it.LoftID, err = graphql.UnmarshalID(v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -3093,6 +3211,12 @@ func UnmarshalNewTask(v interface{}) (NewTask, error) {
 			if err != nil {
 				return it, err
 			}
+		case "loftId":
+			var err error
+			it.LoftID, err = graphql.UnmarshalID(v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -3129,14 +3253,22 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var parsedSchema = gqlparser.MustLoadSchema(
-	&ast.Source{Name: "schema.graphql", Input: `type Member {
+	&ast.Source{Name: "schema.graphql", Input: `# scalar Date   #TODO: find out how it will be (de)serialize
+
+type Member {
   id: ID!
   name: String!
+}
+
+enum TaskState {
+  NOT_DONE
+  DONE
 }
 
 type Task {
   id: ID!
   title: String!
+  state: TaskState!
 }
 
 type Event {
@@ -3165,16 +3297,19 @@ type Echo {
 }
 
 type Query {
-  loft: [Loft!]!
+  lofts: [Loft!]!   # for testing only, should not exist in production version
+  loft(id: ID!): Loft!
   echo: Echo
 }
 
 input NewTask {
   title: String!
+  loftId: ID!
 }
 
 input NewEvent {
   name: String!
+  loftId: ID!
 }
 
 input NewRequest {
@@ -3187,6 +3322,5 @@ type Mutation {
   createTask(input: NewTask!): Task!
   createEvent(input: NewEvent!): Event!
   createRequest(input: NewRequest!): Request!
-
 }`},
 )
