@@ -1,13 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 )
 
-// PostNotes creates a note for the loft
-func PostNotes(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "POST notes seems to be working")
+// CreateNote creates a note for the loft
+func CreateNote(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetNotes = GET /notes

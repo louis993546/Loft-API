@@ -31,18 +31,26 @@ func main() {
 
 	//routing
 	r.HandleFunc("/", home).Methods("GET")
-	r.HandleFunc("/echo", AllEcho).Methods("GET", "PUT", "POST", "DELETE", "PATCH")
-	r.HandleFunc("/lofts", PostLofts).Methods("POST")
-	r.HandleFunc("/notes", PostNotes).Methods("POST")
-	r.HandleFunc("/notes", GetNotes).Methods("GET")
-	r.HandleFunc("/tasks", PostTasks).Methods("POST")
-	r.HandleFunc("/tasks", GetTasks).Methods("GET")
-	r.HandleFunc("/events", PostEvents).Methods("POST")
-	r.HandleFunc("/events", GetEvents).Methods("GET")
-	r.HandleFunc("/members", PostMembers).Methods("POST")
-	r.HandleFunc("/members", GetMembers).Methods("GET")
-	r.HandleFunc("/loft_joining_requests", PostLoftJoiningRequests).Methods("POST")
-	r.HandleFunc("/loft_joining_requests", GetLoftJoiningRequests).Methods("GET")
+
+	r.HandleFunc("/echo", GetEcho).Methods("GET")
+
+	//TODO: I need to think about the sign up process to decide what the endpoint should be
+	// r.HandleFunc("/lofts", SignUp).Methods("POST")
+
+	r.HandleFunc("/lofts/{loftID}/events", CreateEvent).Methods("POST")
+	r.HandleFunc("/lofts/{loftID}/events", GetEvents).Methods("GET")
+
+	r.HandleFunc("/lofts/{loftID}/task", CreateTask).Methods("POST")
+	r.HandleFunc("/lofts/{loftID}/tasks", GetTasks).Methods("GET")
+
+	r.HandleFunc("/lofts/{loftID}/notes", CreateNote).Methods("POST")
+	r.HandleFunc("/lofts/{loftID}/notes", GetNotes).Methods("GET")
+
+	r.HandleFunc("/lofts/{loftID}/members", GetMembers).Methods("GET")
+
+	r.HandleFunc("/lofts/{loftID}/join_request", CreateJoinRequest).Methods("POST")
+	//TODO: I need to think about the sign up process to decide what the "approve/deny join request" should be
+	// r.HandleFunc("/lofts/{loftID}/join_request/{joinRequestID}/decision", SignUp).Methods("POST")
 
 	//start listening
 	fmt.Printf("localhost:%s should be up\n", port)
