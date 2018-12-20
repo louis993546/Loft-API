@@ -37,6 +37,10 @@ type NewEvent struct {
 	LoftID string `json:"loftId"`
 }
 
+type NewLoft struct {
+	Name string `json:"name"`
+}
+
 type NewRequest struct {
 	Name    string `json:"name"`
 	Message string `json:"message"`

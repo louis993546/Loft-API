@@ -63,6 +63,10 @@ input NewRequest {
   loftId: ID!
 }
 
+input NewLoft {
+  name: String!
+}
+
 type Mutation {
   createTask(input: NewTask!): Task!
   createEvent(input: NewEvent!): Event!

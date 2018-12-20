@@ -30,6 +30,14 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (Eve
 func (r *mutationResolver) CreateRequest(ctx context.Context, input NewRequest) (Request, error) {
 	panic("not implemented")
 }
+func (r *mutationResolver) CreateLoft(ctx context.Context, input NewLoft) (Loft, error) {
+	loft := Loft{
+		ID:   fmt.Sprintf("%v", len(r.lofts)),
+		Name: input.Name,
+	}
+	r.lofts = append(r.lofts, loft)
+	return loft, nil
+}
 
 type queryResolver struct{ *Resolver }
 

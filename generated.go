@@ -67,6 +67,7 @@ type ComplexityRoot struct {
 		CreateTask    func(childComplexity int, input NewTask) int
 		CreateEvent   func(childComplexity int, input NewEvent) int
 		CreateRequest func(childComplexity int, input NewRequest) int
+		CreateLoft    func(childComplexity int, input NewLoft) int
 	}
 
 	Query struct {
@@ -92,6 +93,7 @@ type MutationResolver interface {
 	CreateTask(ctx context.Context, input NewTask) (Task, error)
 	CreateEvent(ctx context.Context, input NewEvent) (Event, error)
 	CreateRequest(ctx context.Context, input NewRequest) (Request, error)
+	CreateLoft(ctx context.Context, input NewLoft) (Loft, error)
 }
 type QueryResolver interface {
 	Lofts(ctx context.Context) ([]Loft, error)
@@ -135,6 +137,21 @@ func field_Mutation_createRequest_args(rawArgs map[string]interface{}) (map[stri
 	if tmp, ok := rawArgs["input"]; ok {
 		var err error
 		arg0, err = UnmarshalNewRequest(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+
+}
+
+func field_Mutation_createLoft_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 NewLoft
+	if tmp, ok := rawArgs["input"]; ok {
+		var err error
+		arg0, err = UnmarshalNewLoft(tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -336,6 +353,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateRequest(childComplexity, args["input"].(NewRequest)), true
+
+	case "Mutation.createLoft":
+		if e.complexity.Mutation.CreateLoft == nil {
+			break
+		}
+
+		args, err := field_Mutation_createLoft_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateLoft(childComplexity, args["input"].(NewLoft)), true
 
 	case "Query.lofts":
 		if e.complexity.Query.Lofts == nil {
@@ -1100,6 +1129,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "createLoft":
+			out.Values[i] = ec._Mutation_createLoft(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1211,6 +1245,40 @@ func (ec *executionContext) _Mutation_createRequest(ctx context.Context, field g
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._Request(ctx, field.Selections, &res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Mutation_createLoft(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Mutation_createLoft_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateLoft(rctx, args["input"].(NewLoft))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(Loft)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._Loft(ctx, field.Selections, &res)
 }
 
 var queryImplementors = []string{"Query"}
@@ -3167,6 +3235,24 @@ func UnmarshalNewEvent(v interface{}) (NewEvent, error) {
 	return it, nil
 }
 
+func UnmarshalNewLoft(v interface{}) (NewLoft, error) {
+	var it NewLoft
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "name":
+			var err error
+			it.Name, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func UnmarshalNewRequest(v interface{}) (NewRequest, error) {
 	var it NewRequest
 	var asMap = v.(map[string]interface{})
@@ -3316,9 +3402,14 @@ input NewRequest {
   loftId: ID!
 }
 
+input NewLoft {
+  name: String!
+}
+
 type Mutation {
   createTask(input: NewTask!): Task!
   createEvent(input: NewEvent!): Event!
   createRequest(input: NewRequest!): Request!
+  createLoft(input: NewLoft!): Loft!  # TODO: probably different for production
 }`},
 )
