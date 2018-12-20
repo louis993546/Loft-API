@@ -1,24 +1,59 @@
-type Todo {
-  id: ID!
-  text: String!
-  done: Boolean!
-  user: User!
-}
-
-type User {
+type Member {
   id: ID!
   name: String!
 }
 
-type Query {
-  todos: [Todo!]!
+type Task {
+  id: ID!
+  title: String!
 }
 
-input NewTodo {
-  text: String!
-  userId: String!
+type Event {
+  id: ID!
+  name: String!
+}
+
+type Request {
+  id: ID!
+  name: String!
+  message: String!
+}
+
+type Loft {
+  id: ID!
+  name: String!
+  members: [Member!]!
+  tasks: [Task!]!
+  events: [Event!]!
+  requests: [Request!]!
+}
+
+type Echo {
+  time: String!
+  format: String!
+}
+
+type Query {
+  loft: [Loft!]!
+  echo: Echo
+}
+
+input NewTask {
+  title: String!
+}
+
+input NewEvent {
+  name: String!
+}
+
+input NewRequest {
+  name: String!
+  message: String!
+  loftId: ID!
 }
 
 type Mutation {
-  createTodo(input: NewTodo!): Todo!
+  createTask(input: NewTask!): Task!
+  createEvent(input: NewEvent!): Event!
+  createRequest(input: NewRequest!): Request!
 }
