@@ -2,6 +2,12 @@
 
 package loft
 
+import (
+	"fmt"
+	"io"
+	"strconv"
+)
+
 type Echo struct {
 	Time   string `json:"time"`
 	Format string `json:"format"`
@@ -27,7 +33,8 @@ type Member struct {
 }
 
 type NewEvent struct {
-	Name string `json:"name"`
+	Name   string `json:"name"`
+	LoftID string `json:"loftId"`
 }
 
 type NewRequest struct {
@@ -37,7 +44,8 @@ type NewRequest struct {
 }
 
 type NewTask struct {
-	Title string `json:"title"`
+	Title  string `json:"title"`
+	LoftID string `json:"loftId"`
 }
 
 type Request struct {
@@ -47,6 +55,43 @@ type Request struct {
 }
 
 type Task struct {
-	ID    string `json:"id"`
-	Title string `json:"title"`
+	ID    string    `json:"id"`
+	Title string    `json:"title"`
+	State TaskState `json:"state"`
+}
+
+type TaskState string
+
+const (
+	TaskStateNotDone TaskState = "NOT_DONE"
+	TaskStateDone    TaskState = "DONE"
+)
+
+func (e TaskState) IsValid() bool {
+	switch e {
+	case TaskStateNotDone, TaskStateDone:
+		return true
+	}
+	return false
+}
+
+func (e TaskState) String() string {
+	return string(e)
+}
+
+func (e *TaskState) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = TaskState(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid TaskState", str)
+	}
+	return nil
+}
+
+func (e TaskState) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }

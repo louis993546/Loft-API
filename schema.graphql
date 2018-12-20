@@ -1,11 +1,19 @@
+# scalar Date   #TODO: find out how it will be (de)serialize
+
 type Member {
   id: ID!
   name: String!
 }
 
+enum TaskState {
+  NOT_DONE
+  DONE
+}
+
 type Task {
   id: ID!
   title: String!
+  state: TaskState!
 }
 
 type Event {
@@ -34,16 +42,19 @@ type Echo {
 }
 
 type Query {
-  loft: [Loft!]!
+  lofts: [Loft!]!   # for testing only, should not exist in production version
+  loft(id: ID!): Loft!
   echo: Echo
 }
 
 input NewTask {
   title: String!
+  loftId: ID!
 }
 
 input NewEvent {
   name: String!
+  loftId: ID!
 }
 
 input NewRequest {
