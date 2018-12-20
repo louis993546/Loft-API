@@ -95,7 +95,7 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	Lofts(ctx context.Context) ([]Loft, error)
-	Loft(ctx context.Context, id string) (Loft, error)
+	Loft(ctx context.Context, id string) (*Loft, error)
 	Echo(ctx context.Context) (*Echo, error)
 }
 
@@ -1245,9 +1245,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				out.Values[i] = ec._Query_loft(ctx, field)
-				if out.Values[i] == graphql.Null {
-					invalid = true
-				}
 				wg.Done()
 			}(i, field)
 		case "echo":
@@ -1353,16 +1350,17 @@ func (ec *executionContext) _Query_loft(ctx context.Context, field graphql.Colle
 		return ec.resolvers.Query().Loft(rctx, args["id"].(string))
 	})
 	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(Loft)
+	res := resTmp.(*Loft)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
-	return ec._Loft(ctx, field.Selections, &res)
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._Loft(ctx, field.Selections, res)
 }
 
 // nolint: vetshadow
@@ -3298,7 +3296,7 @@ type Echo {
 
 type Query {
   lofts: [Loft!]!   # for testing only, should not exist in production version
-  loft(id: ID!): Loft!
+  loft(id: ID!): Loft
   echo: Echo
 }
 

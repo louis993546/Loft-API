@@ -3,6 +3,8 @@ package loft
 
 import (
 	"context"
+	"fmt"
+	"sort"
 	"time"
 )
 
@@ -34,8 +36,16 @@ type queryResolver struct{ *Resolver }
 func (r *queryResolver) Lofts(ctx context.Context) ([]Loft, error) {
 	return r.lofts, nil
 }
-func (r *queryResolver) Loft(ctx context.Context, id string) (Loft, error) {
-	panic("not implemented")
+func (r *queryResolver) Loft(ctx context.Context, id string) (*Loft, error) {
+	loftPos := sort.Search(len(r.lofts), func(i int) bool {
+		return r.lofts[i].ID == id
+	})
+
+	if loftPos == len(r.lofts) {
+		return nil, fmt.Errorf("loft not found for loft #%s", id)
+	}
+
+	return &r.lofts[loftPos], nil
 }
 func (r *queryResolver) Echo(ctx context.Context) (*Echo, error) {
 	echo := Echo{

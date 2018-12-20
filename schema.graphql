@@ -43,7 +43,7 @@ type Echo {
 
 type Query {
   lofts: [Loft!]!   # for testing only, should not exist in production version
-  loft(id: ID!): Loft!
+  loft(id: ID!): Loft
   echo: Echo
 }
 
@@ -67,4 +67,5 @@ type Mutation {
   createTask(input: NewTask!): Task!
   createEvent(input: NewEvent!): Event!
   createRequest(input: NewRequest!): Request!
+  createLoft(input: NewLoft!): Loft!  # TODO: probably different for production
 }
