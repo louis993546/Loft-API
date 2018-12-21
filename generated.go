@@ -11,6 +11,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
+	"github.com/louistsaitszho/loft/models"
 	"github.com/vektah/gqlparser"
 	"github.com/vektah/gqlparser/ast"
 )
@@ -31,6 +32,7 @@ type Config struct {
 }
 
 type ResolverRoot interface {
+	Loft() LoftResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
 }
@@ -50,12 +52,21 @@ type ComplexityRoot struct {
 	}
 
 	Loft struct {
-		Id       func(childComplexity int) int
-		Name     func(childComplexity int) int
-		Members  func(childComplexity int) int
-		Tasks    func(childComplexity int) int
-		Events   func(childComplexity int) int
-		Requests func(childComplexity int) int
+		Id            func(childComplexity int) int
+		Name          func(childComplexity int) int
+		MembersCount  func(childComplexity int) int
+		Members       func(childComplexity int) int
+		TasksCount    func(childComplexity int) int
+		Tasks         func(childComplexity int) int
+		EventsCount   func(childComplexity int) int
+		Events        func(childComplexity int) int
+		RequestsCount func(childComplexity int) int
+		Requests      func(childComplexity int) int
+	}
+
+	LoftAndFirstMember struct {
+		Loft        func(childComplexity int) int
+		FirstMember func(childComplexity int) int
 	}
 
 	Member struct {
@@ -64,10 +75,11 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		CreateTask    func(childComplexity int, input NewTask) int
-		CreateEvent   func(childComplexity int, input NewEvent) int
-		CreateRequest func(childComplexity int, input NewRequest) int
-		CreateLoft    func(childComplexity int, input NewLoft) int
+		CreateTask          func(childComplexity int, input NewTask) int
+		CreateEvent         func(childComplexity int, input NewEvent) int
+		CreateRequest       func(childComplexity int, input NewRequest) int
+		CreateLoft          func(childComplexity int, input NewLoft) int
+		CreateLoftAndMember func(childComplexity int, input *NewLoftNewMember) int
 	}
 
 	Query struct {
@@ -89,15 +101,25 @@ type ComplexityRoot struct {
 	}
 }
 
+type LoftResolver interface {
+	Members(ctx context.Context, obj *models.Loft) ([]Member, error)
+
+	Tasks(ctx context.Context, obj *models.Loft) ([]Task, error)
+
+	Events(ctx context.Context, obj *models.Loft) ([]Event, error)
+
+	Requests(ctx context.Context, obj *models.Loft) ([]Request, error)
+}
 type MutationResolver interface {
 	CreateTask(ctx context.Context, input NewTask) (Task, error)
 	CreateEvent(ctx context.Context, input NewEvent) (Event, error)
 	CreateRequest(ctx context.Context, input NewRequest) (Request, error)
-	CreateLoft(ctx context.Context, input NewLoft) (Loft, error)
+	CreateLoft(ctx context.Context, input NewLoft) (models.Loft, error)
+	CreateLoftAndMember(ctx context.Context, input *NewLoftNewMember) (LoftAndFirstMember, error)
 }
 type QueryResolver interface {
-	Lofts(ctx context.Context) ([]Loft, error)
-	Loft(ctx context.Context, id string) (*Loft, error)
+	Lofts(ctx context.Context) ([]models.Loft, error)
+	Loft(ctx context.Context, id string) (*models.Loft, error)
 	Echo(ctx context.Context) (*Echo, error)
 }
 
@@ -152,6 +174,26 @@ func field_Mutation_createLoft_args(rawArgs map[string]interface{}) (map[string]
 	if tmp, ok := rawArgs["input"]; ok {
 		var err error
 		arg0, err = UnmarshalNewLoft(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+
+}
+
+func field_Mutation_createLoftAndMember_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 *NewLoftNewMember
+	if tmp, ok := rawArgs["input"]; ok {
+		var err error
+		var ptr1 NewLoftNewMember
+		if tmp != nil {
+			ptr1, err = UnmarshalNewLoftNewMember(tmp)
+			arg0 = &ptr1
+		}
+
 		if err != nil {
 			return nil, err
 		}
@@ -276,12 +318,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Loft.Name(childComplexity), true
 
+	case "Loft.membersCount":
+		if e.complexity.Loft.MembersCount == nil {
+			break
+		}
+
+		return e.complexity.Loft.MembersCount(childComplexity), true
+
 	case "Loft.members":
 		if e.complexity.Loft.Members == nil {
 			break
 		}
 
 		return e.complexity.Loft.Members(childComplexity), true
+
+	case "Loft.tasksCount":
+		if e.complexity.Loft.TasksCount == nil {
+			break
+		}
+
+		return e.complexity.Loft.TasksCount(childComplexity), true
 
 	case "Loft.tasks":
 		if e.complexity.Loft.Tasks == nil {
@@ -290,6 +346,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Loft.Tasks(childComplexity), true
 
+	case "Loft.eventsCount":
+		if e.complexity.Loft.EventsCount == nil {
+			break
+		}
+
+		return e.complexity.Loft.EventsCount(childComplexity), true
+
 	case "Loft.events":
 		if e.complexity.Loft.Events == nil {
 			break
@@ -297,12 +360,33 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Loft.Events(childComplexity), true
 
+	case "Loft.requestsCount":
+		if e.complexity.Loft.RequestsCount == nil {
+			break
+		}
+
+		return e.complexity.Loft.RequestsCount(childComplexity), true
+
 	case "Loft.requests":
 		if e.complexity.Loft.Requests == nil {
 			break
 		}
 
 		return e.complexity.Loft.Requests(childComplexity), true
+
+	case "LoftAndFirstMember.loft":
+		if e.complexity.LoftAndFirstMember.Loft == nil {
+			break
+		}
+
+		return e.complexity.LoftAndFirstMember.Loft(childComplexity), true
+
+	case "LoftAndFirstMember.firstMember":
+		if e.complexity.LoftAndFirstMember.FirstMember == nil {
+			break
+		}
+
+		return e.complexity.LoftAndFirstMember.FirstMember(childComplexity), true
 
 	case "Member.id":
 		if e.complexity.Member.Id == nil {
@@ -365,6 +449,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateLoft(childComplexity, args["input"].(NewLoft)), true
+
+	case "Mutation.createLoftAndMember":
+		if e.complexity.Mutation.CreateLoftAndMember == nil {
+			break
+		}
+
+		args, err := field_Mutation_createLoftAndMember_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateLoftAndMember(childComplexity, args["input"].(*NewLoftNewMember)), true
 
 	case "Query.lofts":
 		if e.complexity.Query.Lofts == nil {
@@ -661,9 +757,10 @@ func (ec *executionContext) _Event_name(ctx context.Context, field graphql.Colle
 var loftImplementors = []string{"Loft"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _Loft(ctx context.Context, sel ast.SelectionSet, obj *Loft) graphql.Marshaler {
+func (ec *executionContext) _Loft(ctx context.Context, sel ast.SelectionSet, obj *models.Loft) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, loftImplementors)
 
+	var wg sync.WaitGroup
 	out := graphql.NewOrderedMap(len(fields))
 	invalid := false
 	for i, field := range fields {
@@ -682,31 +779,67 @@ func (ec *executionContext) _Loft(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "membersCount":
+			out.Values[i] = ec._Loft_membersCount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "members":
-			out.Values[i] = ec._Loft_members(ctx, field, obj)
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Loft_members(ctx, field, obj)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
+		case "tasksCount":
+			out.Values[i] = ec._Loft_tasksCount(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
 		case "tasks":
-			out.Values[i] = ec._Loft_tasks(ctx, field, obj)
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Loft_tasks(ctx, field, obj)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
+		case "eventsCount":
+			out.Values[i] = ec._Loft_eventsCount(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
 		case "events":
-			out.Values[i] = ec._Loft_events(ctx, field, obj)
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Loft_events(ctx, field, obj)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
+		case "requestsCount":
+			out.Values[i] = ec._Loft_requestsCount(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
 		case "requests":
-			out.Values[i] = ec._Loft_requests(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Loft_requests(ctx, field, obj)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-
+	wg.Wait()
 	if invalid {
 		return graphql.Null
 	}
@@ -714,7 +847,7 @@ func (ec *executionContext) _Loft(ctx context.Context, sel ast.SelectionSet, obj
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Loft_id(ctx context.Context, field graphql.CollectedField, obj *Loft) graphql.Marshaler {
+func (ec *executionContext) _Loft_id(ctx context.Context, field graphql.CollectedField, obj *models.Loft) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -741,7 +874,7 @@ func (ec *executionContext) _Loft_id(ctx context.Context, field graphql.Collecte
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Loft_name(ctx context.Context, field graphql.CollectedField, obj *Loft) graphql.Marshaler {
+func (ec *executionContext) _Loft_name(ctx context.Context, field graphql.CollectedField, obj *models.Loft) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -768,7 +901,7 @@ func (ec *executionContext) _Loft_name(ctx context.Context, field graphql.Collec
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Loft_members(ctx context.Context, field graphql.CollectedField, obj *Loft) graphql.Marshaler {
+func (ec *executionContext) _Loft_membersCount(ctx context.Context, field graphql.CollectedField, obj *models.Loft) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -780,7 +913,34 @@ func (ec *executionContext) _Loft_members(ctx context.Context, field graphql.Col
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Members, nil
+		return obj.MembersCount, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalInt(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Loft_members(ctx context.Context, field graphql.CollectedField, obj *models.Loft) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Loft",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Loft().Members(rctx, obj)
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -828,7 +988,7 @@ func (ec *executionContext) _Loft_members(ctx context.Context, field graphql.Col
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Loft_tasks(ctx context.Context, field graphql.CollectedField, obj *Loft) graphql.Marshaler {
+func (ec *executionContext) _Loft_tasksCount(ctx context.Context, field graphql.CollectedField, obj *models.Loft) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -840,7 +1000,34 @@ func (ec *executionContext) _Loft_tasks(ctx context.Context, field graphql.Colle
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Tasks, nil
+		return obj.TasksCount, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalInt(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Loft_tasks(ctx context.Context, field graphql.CollectedField, obj *models.Loft) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Loft",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Loft().Tasks(rctx, obj)
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -888,7 +1075,7 @@ func (ec *executionContext) _Loft_tasks(ctx context.Context, field graphql.Colle
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Loft_events(ctx context.Context, field graphql.CollectedField, obj *Loft) graphql.Marshaler {
+func (ec *executionContext) _Loft_eventsCount(ctx context.Context, field graphql.CollectedField, obj *models.Loft) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -900,7 +1087,34 @@ func (ec *executionContext) _Loft_events(ctx context.Context, field graphql.Coll
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Events, nil
+		return obj.EventsCount, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalInt(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Loft_events(ctx context.Context, field graphql.CollectedField, obj *models.Loft) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Loft",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Loft().Events(rctx, obj)
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -948,7 +1162,7 @@ func (ec *executionContext) _Loft_events(ctx context.Context, field graphql.Coll
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Loft_requests(ctx context.Context, field graphql.CollectedField, obj *Loft) graphql.Marshaler {
+func (ec *executionContext) _Loft_requestsCount(ctx context.Context, field graphql.CollectedField, obj *models.Loft) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -960,7 +1174,34 @@ func (ec *executionContext) _Loft_requests(ctx context.Context, field graphql.Co
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Requests, nil
+		return obj.RequestsCount, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalInt(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Loft_requests(ctx context.Context, field graphql.CollectedField, obj *models.Loft) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Loft",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Loft().Requests(rctx, obj)
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -1005,6 +1246,97 @@ func (ec *executionContext) _Loft_requests(ctx context.Context, field graphql.Co
 	}
 	wg.Wait()
 	return arr1
+}
+
+var loftAndFirstMemberImplementors = []string{"LoftAndFirstMember"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _LoftAndFirstMember(ctx context.Context, sel ast.SelectionSet, obj *LoftAndFirstMember) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, loftAndFirstMemberImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("LoftAndFirstMember")
+		case "loft":
+			out.Values[i] = ec._LoftAndFirstMember_loft(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "firstMember":
+			out.Values[i] = ec._LoftAndFirstMember_firstMember(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _LoftAndFirstMember_loft(ctx context.Context, field graphql.CollectedField, obj *LoftAndFirstMember) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "LoftAndFirstMember",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Loft, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(models.Loft)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._Loft(ctx, field.Selections, &res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _LoftAndFirstMember_firstMember(ctx context.Context, field graphql.CollectedField, obj *LoftAndFirstMember) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "LoftAndFirstMember",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FirstMember, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(Member)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._Member(ctx, field.Selections, &res)
 }
 
 var memberImplementors = []string{"Member"}
@@ -1131,6 +1463,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "createLoft":
 			out.Values[i] = ec._Mutation_createLoft(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "createLoftAndMember":
+			out.Values[i] = ec._Mutation_createLoftAndMember(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -1274,11 +1611,45 @@ func (ec *executionContext) _Mutation_createLoft(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.(Loft)
+	res := resTmp.(models.Loft)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._Loft(ctx, field.Selections, &res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Mutation_createLoftAndMember(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Mutation_createLoftAndMember_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateLoftAndMember(rctx, args["input"].(*NewLoftNewMember))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(LoftAndFirstMember)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._LoftAndFirstMember(ctx, field.Selections, &res)
 }
 
 var queryImplementors = []string{"Query"}
@@ -1357,7 +1728,7 @@ func (ec *executionContext) _Query_lofts(ctx context.Context, field graphql.Coll
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]Loft)
+	res := resTmp.([]models.Loft)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
@@ -1420,7 +1791,7 @@ func (ec *executionContext) _Query_loft(ctx context.Context, field graphql.Colle
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*Loft)
+	res := resTmp.(*models.Loft)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
@@ -3253,6 +3624,30 @@ func UnmarshalNewLoft(v interface{}) (NewLoft, error) {
 	return it, nil
 }
 
+func UnmarshalNewLoftNewMember(v interface{}) (NewLoftNewMember, error) {
+	var it NewLoftNewMember
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "loftName":
+			var err error
+			it.LoftName, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "memberName":
+			var err error
+			it.MemberName, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func UnmarshalNewRequest(v interface{}) (NewRequest, error) {
 	var it NewRequest
 	var asMap = v.(map[string]interface{})
@@ -3369,10 +3764,19 @@ type Request {
 type Loft {
   id: ID!
   name: String!
+  membersCount: Int!
   members: [Member!]!
+  tasksCount: Int!
   tasks: [Task!]!
+  eventsCount: Int!
   events: [Event!]!
+  requestsCount: Int!
   requests: [Request!]!
+}
+
+type LoftAndFirstMember {
+  loft: Loft!
+  firstMember: Member!
 }
 
 type Echo {
@@ -3406,10 +3810,16 @@ input NewLoft {
   name: String!
 }
 
+input NewLoftNewMember {
+  loftName: String!
+  memberName: String!
+}
+
 type Mutation {
   createTask(input: NewTask!): Task!
   createEvent(input: NewEvent!): Event!
   createRequest(input: NewRequest!): Request!
   createLoft(input: NewLoft!): Loft!  # TODO: probably different for production
+  createLoftAndMember(input: NewLoftNewMember): LoftAndFirstMember!
 }`},
 )

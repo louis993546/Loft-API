@@ -30,10 +30,19 @@ type Request {
 type Loft {
   id: ID!
   name: String!
+  membersCount: Int!
   members: [Member!]!
+  tasksCount: Int!
   tasks: [Task!]!
+  eventsCount: Int!
   events: [Event!]!
+  requestsCount: Int!
   requests: [Request!]!
+}
+
+type LoftAndFirstMember {
+  loft: Loft!
+  firstMember: Member!
 }
 
 type Echo {
@@ -67,9 +76,15 @@ input NewLoft {
   name: String!
 }
 
+input NewLoftNewMember {
+  loftName: String!
+  memberName: String!
+}
+
 type Mutation {
   createTask(input: NewTask!): Task!
   createEvent(input: NewEvent!): Event!
   createRequest(input: NewRequest!): Request!
   createLoft(input: NewLoft!): Loft!  # TODO: probably different for production
+  createLoftAndMember(input: NewLoftNewMember): LoftAndFirstMember!
 }

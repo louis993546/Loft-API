@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+
+	"github.com/louistsaitszho/loft/models"
 )
 
 type Echo struct {
@@ -18,13 +20,9 @@ type Event struct {
 	Name string `json:"name"`
 }
 
-type Loft struct {
-	ID       string    `json:"id"`
-	Name     string    `json:"name"`
-	Members  []Member  `json:"members"`
-	Tasks    []Task    `json:"tasks"`
-	Events   []Event   `json:"events"`
-	Requests []Request `json:"requests"`
+type LoftAndFirstMember struct {
+	Loft        models.Loft `json:"loft"`
+	FirstMember Member      `json:"firstMember"`
 }
 
 type Member struct {
@@ -39,6 +37,11 @@ type NewEvent struct {
 
 type NewLoft struct {
 	Name string `json:"name"`
+}
+
+type NewLoftNewMember struct {
+	LoftName   string `json:"loftName"`
+	MemberName string `json:"memberName"`
 }
 
 type NewRequest struct {

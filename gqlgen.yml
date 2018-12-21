@@ -12,6 +12,6 @@ model:
 resolver:
   filename: resolver.go
   type: Resolver
-# models:
-#   Todo:
-#     model: github.com/louistsaitszho/loft/gettingstarted.Todo
+models:
+  Loft:
+    model: github.com/louistsaitszho/loft/models.Loft
