@@ -1,53 +1,62 @@
-CREATE TABLE IF NOT EXISTS loft(
-    id uuid PRIMARY KEY,
-    name text,
-    join_code text,
-    created_at timestamptz DEFAULT NOW()
+CREATE SCHEMA IF NOT EXISTS loft;
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+CREATE TABLE IF NOT EXISTS loft.loft (
+    id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name text NOT NULL,
+    join_code text NOT NULL,
+    created_at timestamptz NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS join_request(
-    id uuid PRIMARY KEY,
-    loft_id uuid REFERENCES loft(id),
-    name text,
+CREATE TABLE IF NOT EXISTS loft.join_request(
+    id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+    loft_id uuid not null REFERENCES loft(id),
+    name text not null,
     message text,
-    created_at timestamptz DEFAULT NOW()
+    created_at timestamptz not null DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS member(
-    id uuid PRIMARY KEY,
-    loft_id uuid REFERENCES loft(id),
+CREATE TABLE IF NOT EXISTS loft.member(
+    id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+    loft_id uuid not null REFERENCES loft.loft(id),
     approved_at timestamptz,
     approved_by_member_id uuid,
-    name text,
+    name text not null,
     phone text,
     email text,
     join_request_id uuid,
-    FOREIGN KEY (approved_by_member_id) REFERENCES member(id)
+    FOREIGN KEY (approved_by_member_id) REFERENCES loft.member(id)
 );
 
--- TODO: make this one a table instead
-CREATE TYPE noteformat AS ENUM ('COMMON_MARK_V_0_28');
-
-CREATE TABLE IF NOT EXISTS note(
-    id uuid PRIMARY KEY,
-    loft_id uuid REFERENCES loft(id),
-    creator_id uuid REFERENCES member(id),
-    created_at timestamptz DEFAULT NOW(),
-    format noteformat DEFAULT 'COMMON_MARK_V_0_28',
-    content text
+CREATE TABLE IF NOT EXISTS loft.note_format(
+    id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name TEXT NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS task(
+INSERT INTO loft.note_format (name) VALUES (`COMMON_MARK_V_0_28`) RETURNING id;
+
+-- TODO: find out how to return id as the new default value
+
+CREATE TABLE IF NOT EXISTS loft.note(
     id uuid PRIMARY KEY,
-    loft_id uuid REFERENCES loft(id),
-    creator_id uuid REFERENCES member(id),
+    loft_id uuid REFERENCES loft.loft(id),
+    creator_id uuid REFERENCES loft.member(id),
     created_at timestamptz DEFAULT NOW(),
-    assignee_id uuid REFERENCES member(id),
-    title text,
+    format uuid not null REFERENCES loft.note_format(id),
+    content text not null
+);
+
+CREATE TABLE IF NOT EXISTS loft.task(
+    id uuid PRIMARY KEY default uuid_generate_v4(),
+    loft_id uuid not null REFERENCES loft.loft(id),
+    creator_id uuid not null REFERENCES loft.member(id),
+    created_at timestamptz not null DEFAULT NOW(),
+    assignee_id uuid REFERENCES loft.member(id),
+    title text not null,
     due_date date
 );
 
-CREATE TABLE IF NOT EXISTS event(
+CREATE TABLE IF NOT EXISTS loft.event(
     id	uuid,
     loft_id	uuid REFERENCES loft(id),
     creator_id	uuid REFERENCES member(id),
@@ -60,7 +69,7 @@ CREATE TABLE IF NOT EXISTS event(
 -- TODO: make this one a table instead
 CREATE TYPE messagetype AS ENUM('TEXT', 'IMAGE_REF');
 
-CREATE TABLE IF NOT EXISTS message(
+CREATE TABLE IF NOT EXISTS loft.message(
     id	uuid PRIMARY KEY,
     loft_id	uuid REFERENCES loft(id),
     created_at	timestamptz DEFAULT NOW(),
@@ -69,7 +78,7 @@ CREATE TABLE IF NOT EXISTS message(
     type messagetype
 );
 
-CREATE TABLE IF NOT EXISTS session(
+CREATE TABLE IF NOT EXISTS loft.session(
     id uuid PRIMARY KEY,
     member_id uuid REFERENCES member(id),
     created_at timestamptz DEFAULT NOW(),

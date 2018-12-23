@@ -62,3 +62,5 @@ Just read the [current documentation](https://www.postgresql.org/docs/current/tu
   - list of tables
 - `SELECT version();`
   - list version of postgres
+- `CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`
+  - so that `uuid_generate_v4()` works
