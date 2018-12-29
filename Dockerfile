@@ -1,11 +1,9 @@
 FROM golang:1.11.2-stretch
 
-RUN mkdir -p /loft
-COPY . /loft/
-WORKDIR /loft/
+RUN mkdir -p $GOPATH/src/github.com/louistsaitszho/loft
+COPY . $GOPATH/src/github.com/louistsaitszho/loft/
+WORKDIR $GOPATH/src/github.com/louistsaitszho/loft/server
 
-# RUN go install 
+RUN go build
 
-# CMD ["./server"]
-
-CMD ["go run server/server.go"]
+CMD ["./server"]
