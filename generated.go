@@ -120,7 +120,7 @@ type MutationResolver interface {
 type QueryResolver interface {
 	Lofts(ctx context.Context) ([]models.Loft, error)
 	Loft(ctx context.Context, id string) (*models.Loft, error)
-	Echo(ctx context.Context) (*Echo, error)
+	Echo(ctx context.Context) (Echo, error)
 }
 
 func field_Mutation_createTask_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
@@ -1690,6 +1690,9 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				out.Values[i] = ec._Query_echo(ctx, field)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
 				wg.Done()
 			}(i, field)
 		case "__type":
@@ -1818,17 +1821,16 @@ func (ec *executionContext) _Query_echo(ctx context.Context, field graphql.Colle
 		return ec.resolvers.Query().Echo(rctx)
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*Echo)
+	res := resTmp.(Echo)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
-	if res == nil {
-		return graphql.Null
-	}
-
-	return ec._Echo(ctx, field.Selections, res)
+	return ec._Echo(ctx, field.Selections, &res)
 }
 
 // nolint: vetshadow
@@ -3787,7 +3789,7 @@ type Echo {
 type Query {
   lofts: [Loft!]!   # for testing only, should not exist in production version
   loft(id: ID!): Loft
-  echo: Echo
+  echo: Echo!
 }
 
 input NewTask {

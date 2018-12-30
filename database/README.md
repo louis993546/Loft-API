@@ -2,11 +2,6 @@
 
 All the basics of the database
 
-## Basic specs
-
-- RDBMS w/ PostgreSQL
-- (Probably) connected with [`github.com/lib/pg`](https://github.com/lib/pq)
-
 ## Schema
 
 <!-- TODO -->

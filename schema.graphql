@@ -53,7 +53,7 @@ type Echo {
 type Query {
   lofts: [Loft!]!   # for testing only, should not exist in production version
   loft(id: ID!): Loft
-  echo: Echo
+  echo: Echo!
 }
 
 input NewTask {
