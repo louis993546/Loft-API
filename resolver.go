@@ -3,7 +3,6 @@ package loft
 import (
 	"context"
 	"database/sql"
-	"log"
 	"time"
 
 	"github.com/louistsaitszho/loft/models"
@@ -78,9 +77,6 @@ func (r *queryResolver) Loft(ctx context.Context, id string) (*models.Loft, erro
 	panic("not implemented")
 }
 func (r *queryResolver) Echo(ctx context.Context) (Echo, error) {
-	dbStats := r.db.Stats()
-	log.Printf("%+v\n", dbStats)
-
 	echo := Echo{
 		Time:   time.Now().UTC().Format(time.RFC3339),
 		Format: "RFC3339",
