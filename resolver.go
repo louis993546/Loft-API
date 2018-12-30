@@ -7,14 +7,20 @@ import (
 	"github.com/louistsaitszho/loft/models"
 )
 
+// Resolver is the entry point to how the query tree got processed
 type Resolver struct{}
 
+// Loft returns a resolver that is able to resolve struct Loft
 func (r *Resolver) Loft() LoftResolver {
 	return &loftResolver{r}
 }
+
+// Mutation returns a resolver that is able to resolve mutations
 func (r *Resolver) Mutation() MutationResolver {
 	return &mutationResolver{r}
 }
+
+// Query returns a resolver that is able to resolve query
 func (r *Resolver) Query() QueryResolver {
 	return &queryResolver{r}
 }
