@@ -2,13 +2,23 @@ package loft
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
 	"github.com/louistsaitszho/loft/models"
 )
 
 // Resolver is the entry point to how the query tree got processed
-type Resolver struct{}
+type Resolver struct {
+	db *sql.DB
+}
+
+// NewResolver is essentially the constructor for Resolver. It reminds user that they should give Resolver a db to access
+func NewResolver(db *sql.DB) *Resolver {
+	return &Resolver{
+		db: db,
+	}
+}
 
 // Loft returns a resolver that is able to resolve struct Loft
 func (r *Resolver) Loft() LoftResolver {
