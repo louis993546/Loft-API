@@ -25,13 +25,14 @@ func main() {
 		log.Panic("No DATABASE_URL from env")
 	}
 
-	_, err := sql.Open("postgres", connStr)
+	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	http.Handle("/", handler.Playground("GraphQL playground", "/query"))
-	http.Handle("/query", handler.GraphQL(loft.NewExecutableSchema(loft.Config{Resolvers: &loft.Resolver{}})))
+	resolver := loft.NewResolver(db)
+	http.Handle("/query", handler.GraphQL(loft.NewExecutableSchema(loft.Config{Resolvers: resolver})))
 
 	domain := os.Getenv("DOMAIN")
 	if domain == "" {
