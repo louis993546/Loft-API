@@ -2,6 +2,7 @@ package loft_test
 
 import (
 	"context"
+	"regexp"
 	"testing"
 
 	"github.com/louistsaitszho/loft"
@@ -17,8 +18,14 @@ func TestEcho(t *testing.T) {
 
 	expectedFormat := "RFC3339"
 	if echo.Format != expectedFormat {
-		t.Fatalf("Echo time format must be %s, but got %s instead", expectedFormat, echo.Format)
+		t.Fatalf("Echo time format must be %s, but got %s instead\n", expectedFormat, echo.Format)
 	}
 
-	// TODO: regex for time to make sure it is UTC
+	pattern := "^(\\d{4})(-)(\\d{2})(-)(\\d{2})(T)(\\d{2})(:)(\\d{2})(:)(\\d{2})(Z)$"
+	r, _ := regexp.Compile(pattern)
+
+	validTimestampPattern := r.MatchString(echo.Time)
+	if validTimestampPattern == false {
+		t.Fatalf("Looks like the timestamp is not in the right pattern: %s\n", echo.Time)
+	}
 }
