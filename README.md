@@ -1,70 +1,38 @@
-# Loft API
+# Loft GraphQL API
 
-## Ground rules
+- Powered by gqlgen
+- PostgreSQL database
+- Hosted on Heroku
+- Package in Docker image
 
-- Specification in OpenAPI 3.0.2
+## Run locally
 
-## Structure
+### From source code
 
-### Goal (v1.0.0)
+1. Clone the repository to your $GOPATH
+2. (`dep ensure` I think?)
+3. `go run server/server.go`
+   - Make sure you/your system provides all the necessary environment variables, including:
+     - `PORT`
+     - `DATABASE_URL`
+     - (optional) `DOMAIN`
 
-1. Database
-   - PostgreSQL
-2. Auth service
-   - TBC
-3. Router
-   - `main.go`
-   - Powered by mux
-   - has basically no business logic
-   - It should make scaling a lot easier
-4. {each endpoint}
+### From docker image @ Docker Hub
 
-### Currently
+Once the git process has been setup correctly, publishing image will be automated. Right now Docker Hub only has a very old version of the image
 
-1. Database
-   - Either a docker image, or Heroku pgSQL
-2. Service
-   - Router + Auth + every endpoint = `main.go`
+## Deploy
 
-## Build and/or run
+Right now it's still through manual `git push heroku master`, and it will be changed to use webhook in heroku ASAP
 
-### Just GO
+### Build docker image
 
-This project is using go module from 1.11
+`docker build --rm -t api-loft:latest .`
 
-1. Make sure you have go 1.11.2 or newer
-2. `go build`
-3. `PORT={port of your choice} ./loft`
-4. Open browser, and it should be up and running
+### Run bash in image
 
-### Docker
+`docker run -it api-loft:latest bash`
 
-1. Make sure Docker is up and running
-2. `docker build --rm -t api-loft:latest .`
-   - Copy necessary files into the container
-   - `go build` will trigger modules to `go get` dependencies specified in `go.mod`
-3. `docker run -it --rm -p 8080:8080 -e PORT=8080 api-loft:latest`
-   - Execute `CMD` specified in the `Dockerfile`
+### Run `CMD` in image
 
-## Database
-
-At some point this section will be integrated into the build section, but right now these 2 parts are not connected.
-
-1. [Install psql to your machine](https://www.postgresql.org/download/)
-2. Setup user?
-3. Init schema
-
-## Publish image
-
-1. `docker login` if necessary
-2. build the docker image (see [above](#docker))
-3. `docker tag api-loft:{version name} louis993546/loft:{version name}`
-4. `docker push louis993546/loft:{version name}`
-   This will take a while
-
-For more info, check [the official documentation](https://docs.docker.com/docker-cloud/builds/push-images/)
-
-## Timeline
-
-- 2018/12/19
-  - "Structure the DTO by following JSON API" has been scratted, due to the fact that it adds way too many extra hurdles to client side.
+`docker run -it --rm -p 8080:8080 -e PORT=8080 api-loft:latest` (TODO: probably missing a couple variables)

@@ -1,4 +1,1 @@
-.DS_Store
-mockServer/node_modules
-.vscode/settings.json
-loft
+server/server

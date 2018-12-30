@@ -1,0 +1,90 @@
+# scalar Date   #TODO: find out how it will be (de)serialize
+
+type Member {
+  id: ID!
+  name: String!
+}
+
+enum TaskState {
+  NOT_DONE
+  DONE
+}
+
+type Task {
+  id: ID!
+  title: String!
+  state: TaskState!
+}
+
+type Event {
+  id: ID!
+  name: String!
+}
+
+type Request {
+  id: ID!
+  name: String!
+  message: String!
+}
+
+type Loft {
+  id: ID!
+  name: String!
+  membersCount: Int!
+  members: [Member!]!
+  tasksCount: Int!
+  tasks: [Task!]!
+  eventsCount: Int!
+  events: [Event!]!
+  requestsCount: Int!
+  requests: [Request!]!
+}
+
+type LoftAndFirstMember {
+  loft: Loft!
+  firstMember: Member!
+}
+
+type Echo {
+  time: String!
+  format: String!
+}
+
+type Query {
+  lofts: [Loft!]!   # for testing only, should not exist in production version
+  loft(id: ID!): Loft
+  echo: Echo
+}
+
+input NewTask {
+  title: String!
+  loftId: ID!
+}
+
+input NewEvent {
+  name: String!
+  loftId: ID!
+}
+
+input NewRequest {
+  name: String!
+  message: String!
+  loftId: ID!
+}
+
+input NewLoft {
+  name: String!
+}
+
+input NewLoftNewMember {
+  loftName: String!
+  memberName: String!
+}
+
+type Mutation {
+  createTask(input: NewTask!): Task!
+  createEvent(input: NewEvent!): Event!
+  createRequest(input: NewRequest!): Request!
+  createLoft(input: NewLoft!): Loft!  # TODO: probably different for production
+  createLoftAndMember(input: NewLoftNewMember): LoftAndFirstMember!
+}
