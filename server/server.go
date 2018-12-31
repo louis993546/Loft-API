@@ -28,19 +28,19 @@ func main() {
 		log.Fatalf("Cannot connect to DB: %s", err.Error())
 	}
 
-	schemaVersion, err := getSchemaVersion(db)
+	schemaVersion, err := database.GetSchemaVersion(db)
 	if err != nil {
 		switch err.(type) {
 		case *database.ErrorNotFound:
 			log.Println("Can't find schema version, there is probably no db here in the first place. Will initialize it now...")
-			initializeDatabase(db)
+			database.InitializeDatabase(db)
 		case *database.ErrorCorrupted:
 			panic("not implemented")
 		}
 	} else {
 		switch {
 		case schemaVersion < compatibleDatabaseSchemaVersion:
-			performDatabaseMigration(schemaVersion, compatibleDatabaseSchemaVersion)
+			database.PerformDatabaseMigration(schemaVersion, compatibleDatabaseSchemaVersion)
 		case schemaVersion == compatibleDatabaseSchemaVersion:
 			log.Println("Code & Database schema match 👍")
 		case schemaVersion > compatibleDatabaseSchemaVersion:
@@ -67,17 +67,4 @@ func main() {
 
 	log.Printf("connect to %s:%s/ for GraphQL playground", domain, port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
-}
-
-func initializeDatabase(db *sql.DB) {
-	panic("not implemented")
-}
-
-// getSchemaVersion goes to db and get's the schema version from it.
-func getSchemaVersion(db *sql.DB) (int, error) {
-	panic("not implemented")
-}
-
-func performDatabaseMigration(currentVersion int, compatibleVersion int) {
-	panic("not implemented")
 }
