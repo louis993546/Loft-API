@@ -36,6 +36,8 @@ func main() {
 			database.InitializeDatabase(db)
 		case *database.ErrorCorrupted:
 			panic("not implemented")
+		default:
+			panic("not implemented")
 		}
 	} else {
 		switch {

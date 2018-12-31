@@ -2,7 +2,6 @@ package database
 
 import (
 	"database/sql"
-	"errors"
 	"strconv"
 )
 
@@ -27,11 +26,15 @@ func GetSchemaVersion(db *sql.DB) (int, error) {
 		versions = append(versions, version)
 	}
 
-	if len(versions) != 1 {
-		return -1, errors.New("There are more then 1 row with key 'SCHEMA_VERSION', something went wrong")
+	switch len(versions) {
+	case 0:
+		return -1, NewNotFoundError("")
+	case 1:
+		return strconv.Atoi(versions[0])
+	default:
+		// TODO: might want to break down how many types of "corrupt" error there can be
+		return -1, NewCorruptedError(-1, []string{}, []string{})
 	}
-
-	return strconv.Atoi(versions[0])
 }
 
 func PerformDatabaseMigration(currentVersion int, compatibleVersion int) {
