@@ -6,12 +6,15 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/louistsaitszho/loft/database"
+
 	"github.com/99designs/gqlgen/handler"
 	_ "github.com/lib/pq"
 	"github.com/louistsaitszho/loft"
 )
 
 const defaultPort = "8080"
+const compatibleDatabaseSchemaVersion = 0
 
 func main() {
 	// Setup DB
@@ -23,6 +26,26 @@ func main() {
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatalf("Cannot connect to DB: %s", err.Error())
+	}
+
+	schemaVersion, err := getSchemaVersion(db)
+	if err != nil {
+		switch err.(type) {
+		case *database.ErrorNotFound:
+			log.Println("Can't find schema version, there is probably no db here in the first place. Will initialize it now...")
+			initializeDatabase(db)
+		case *database.ErrorCorrupted:
+			panic("not implemented")
+		}
+	} else {
+		switch {
+		case schemaVersion < compatibleDatabaseSchemaVersion:
+			performDatabaseMigration(schemaVersion, compatibleDatabaseSchemaVersion)
+		case schemaVersion == compatibleDatabaseSchemaVersion:
+			log.Println("Code & Database schema match 👍")
+		case schemaVersion > compatibleDatabaseSchemaVersion:
+			log.Fatalf("Database v%d is ahead of the code!? It should not go higher then %d", schemaVersion, compatibleDatabaseSchemaVersion)
+		}
 	}
 
 	// Setup GraphQL
@@ -44,4 +67,17 @@ func main() {
 
 	log.Printf("connect to %s:%s/ for GraphQL playground", domain, port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
+}
+
+func initializeDatabase(db *sql.DB) {
+	panic("not implemented")
+}
+
+// getSchemaVersion goes to db and get's the schema version from it.
+func getSchemaVersion(db *sql.DB) (int, error) {
+	panic("not implemented")
+}
+
+func performDatabaseMigration(currentVersion int, compatibleVersion int) {
+	panic("not implemented")
 }
