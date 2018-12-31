@@ -10,7 +10,7 @@ import (
 
 // InitializeDatabase initialize the db according to init.sql
 func InitializeDatabase(db *sql.DB) error {
-	absPath, _ := filepath.Abs("init.sql")
+	absPath, _ := filepath.Abs("../database/init.sql")
 	fileByteArray, fileErr := ioutil.ReadFile(absPath)
 	if fileErr != nil {
 		return fileErr
