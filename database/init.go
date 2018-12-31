@@ -4,12 +4,14 @@ import (
 	"database/sql"
 	"fmt"
 	"io/ioutil"
+	"path/filepath"
 	"strconv"
 )
 
 // InitializeDatabase initialize the db according to init.sql
 func InitializeDatabase(db *sql.DB) error {
-	fileByteArray, fileErr := ioutil.ReadFile("init.sql")
+	absPath, _ := filepath.Abs("init.sql")
+	fileByteArray, fileErr := ioutil.ReadFile(absPath)
 	if fileErr != nil {
 		return fileErr
 	}
