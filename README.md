@@ -48,3 +48,17 @@ And if you want to manually deploy something, you can do it in the heroku dashbo
 2. `git push heroku <local branch name>:master`
 
 Make sure if you do this, you don't mess up the 4 apps and deploy something to the wrong app.
+
+## CI/CD
+
+### Travis CI
+
+In Progress
+
+### CircleCI
+
+TBD
+
+### GitLab CI
+
+TBD
