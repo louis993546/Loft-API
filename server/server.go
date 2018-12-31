@@ -14,29 +14,32 @@ import (
 const defaultPort = "8080"
 
 func main() {
-	port := os.Getenv("PORT")
-	if port == "" {
-		log.Printf("PORT not found from env, will fallback to %s", defaultPort)
-		port = defaultPort
-	}
-
+	// Setup DB
 	connStr := os.Getenv("DATABASE_URL")
 	if connStr == "" {
-		log.Panic("No DATABASE_URL from env")
+		log.Fatalln("No DATABASE_URL from env")
 	}
 
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Cannot connect to DB: %s", err.Error())
 	}
 
+	// Setup GraphQL
 	http.Handle("/", handler.Playground("GraphQL playground", "/query"))
 	resolver := loft.NewResolver(db)
 	http.Handle("/query", handler.GraphQL(loft.NewExecutableSchema(loft.Config{Resolvers: resolver})))
 
+	// Setup network
 	domain := os.Getenv("DOMAIN")
 	if domain == "" {
 		domain = "http://localhost"
+	}
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		log.Printf("PORT not found from env, will fallback to %s", defaultPort)
+		port = defaultPort
 	}
 
 	log.Printf("connect to %s:%s/ for GraphQL playground", domain, port)
