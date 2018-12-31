@@ -35,7 +35,7 @@ func main() {
 			log.Println("Can't find schema version, there is probably no db here in the first place. Will initialize it now...")
 			initErr := database.InitializeDatabase(db)
 			if initErr != nil {
-				log.Fatalf("Failed to init database: %v", initErr)
+				log.Fatalf("Failed to init database: '%v'", initErr)
 			}
 		case *database.ErrorCorrupted:
 			panic("not implemented")

@@ -4,8 +4,8 @@ CREATE SCHEMA IF NOT EXISTS loft;
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE IF NOT EXISTS loft.meta(
-    key text not null PRIMARY KEY,
-    value text not null
+    key TEXT NOT NULL PRIMARY KEY,
+    value TEXT NOT NULL
 );
 
 INSERT INTO loft.meta (key, value) VALUES ('SCHEMA_VERSION', '0');
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS loft.loft (
 
 CREATE TABLE IF NOT EXISTS loft.join_request(
     id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-    loft_id uuid not null REFERENCES loft(id),
+    loft_id uuid not null REFERENCES loft.loft(id),
     name text not null,
     message text,
     created_at timestamptz not null DEFAULT NOW()
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS loft.note_format(
     name TEXT NOT NULL
 );
 
-INSERT INTO loft.note_format (name) VALUES (`COMMON_MARK_V_0_28`) RETURNING id;
+INSERT INTO loft.note_format (name) VALUES ('COMMON_MARK_V_0_28') RETURNING id;
 
 -- TODO: find out how to return id as the new default value
 
@@ -94,7 +94,7 @@ CREATE TABLE IF NOT EXISTS loft.message(
 
 CREATE TABLE IF NOT EXISTS loft.session(
     id uuid PRIMARY KEY default uuid_generate_v4(),
-    member_id uuid REFERENCES member(id),
+    member_id uuid REFERENCES loft.member(id),
     created_at timestamptz DEFAULT NOW(),
     last_used_at timestamptz,
     last_used_ip cidr
