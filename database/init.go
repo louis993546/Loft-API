@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"path/filepath"
 	"strconv"
 )
@@ -54,6 +55,8 @@ func GetSchemaVersion(db *sql.DB) (int, error) {
 	}
 }
 
-func PerformDatabaseMigration(currentVersion int, compatibleVersion int) {
-	panic("not implemented")
+// PerformDatabaseMigration should correctly + gradually migrate from currentVersion to compatibleVersion
+// TODO: return error
+func PerformDatabaseMigration(db *sql.DB, currentVersion int, compatibleVersion int) {
+	log.Panicln("not implemented")
 }

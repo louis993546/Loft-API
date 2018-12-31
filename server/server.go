@@ -38,14 +38,14 @@ func main() {
 				log.Fatalf("Failed to init database: '%v'", initErr)
 			}
 		case *database.ErrorCorrupted:
-			panic("not implemented")
+			log.Panicln("not implemented")
 		default:
 			log.Panicf("not implemented: '%v'\n", err)
 		}
 	} else {
 		switch {
 		case schemaVersion < compatibleDatabaseSchemaVersion:
-			database.PerformDatabaseMigration(schemaVersion, compatibleDatabaseSchemaVersion)
+			database.PerformDatabaseMigration(db, schemaVersion, compatibleDatabaseSchemaVersion)
 		case schemaVersion == compatibleDatabaseSchemaVersion:
 			log.Println("Code & Database schema match 👍")
 		case schemaVersion > compatibleDatabaseSchemaVersion:
