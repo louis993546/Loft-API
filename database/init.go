@@ -2,22 +2,31 @@ package database
 
 import (
 	"database/sql"
+	"fmt"
+	"io/ioutil"
 	"strconv"
 )
 
-func InitializeDatabase(db *sql.DB) {
-	panic("not implemented")
+// InitializeDatabase initialize the db according to init.sql
+func InitializeDatabase(db *sql.DB) error {
+	fileByteArray, fileErr := ioutil.ReadFile("init.sql")
+	if fileErr != nil {
+		return fileErr
+	}
+
+	_, execErr := db.Exec(fmt.Sprintf("%s", fileByteArray))
+	return execErr
 }
 
 // GetSchemaVersion goes to db and get's the schema version from it.
 func GetSchemaVersion(db *sql.DB) (int, error) {
 	rows, queryErr := db.Query("SELECT loft.meta.value FROM loft WHERE loft.meta.key='SCHEMA_VERSION'")
-	// TODO: if error is about loft/loft.meta/loft.meta.value/loft.meta.key not found, it probably means the schema is not there at all -> NotFoundError
 	if queryErr != nil {
 		switch queryErr.Error() {
 		case "pq: relation \"loft\" does not exist":
 			return -1, NewNotFoundError("Schema 'loft' does not exist")
 		default:
+			//TODO: find out what other kinds of error can happen
 			return -1, queryErr
 		}
 	}
@@ -34,7 +43,7 @@ func GetSchemaVersion(db *sql.DB) (int, error) {
 
 	switch len(versions) {
 	case 0:
-		return -1, NewNotFoundError("")
+		return -1, NewNotFoundError("Database (and meta table) exists, but there is no schema version record")
 	case 1:
 		return strconv.Atoi(versions[0])
 	default:
