@@ -1,0 +1,19 @@
+image: golang:1.11.2
+
+stages:
+  - test
+
+unit_tests:
+  stage: test
+  script:
+    - go test
+
+# race_detector:
+#   stage: test
+#   script:
+#     - make race
+
+# memory_sanitizer:
+#   stage: test
+#   script:
+#     - make msan
