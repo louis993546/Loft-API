@@ -1,5 +1,10 @@
 image: golang:1.11.2
 
+
+before_script:
+  - mkdir -p $GOPATH/src/github.com/louistsaitszho/graphql
+  - cp -r $CI_PROJECT_DIR $GOPATH/src/github.com/louistsaitszho/graphql
+
 stages:
   - test
 
