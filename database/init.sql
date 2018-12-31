@@ -3,6 +3,13 @@
 CREATE SCHEMA IF NOT EXISTS loft;
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+CREATE TABLE IF NOT EXISTS loft.meta(
+    key text not null PRIMARY KEY,
+    value text not null
+);
+
+INSERT INTO loft.meta (key, value) VALUES ('SCHEMA_VERSION', '0');
+
 CREATE TABLE IF NOT EXISTS loft.loft (
     id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
     name text NOT NULL,
