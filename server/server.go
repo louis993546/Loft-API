@@ -37,7 +37,7 @@ func main() {
 		case *database.ErrorCorrupted:
 			panic("not implemented")
 		default:
-			log.Panicf("not implementedL %v\n", err)
+			log.Panicf("not implemented: '%v'\n", err)
 		}
 	} else {
 		switch {

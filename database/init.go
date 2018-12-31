@@ -12,8 +12,14 @@ func InitializeDatabase(db *sql.DB) {
 // GetSchemaVersion goes to db and get's the schema version from it.
 func GetSchemaVersion(db *sql.DB) (int, error) {
 	rows, queryErr := db.Query("SELECT loft.meta.value FROM loft WHERE loft.meta.key='SCHEMA_VERSION'")
+	// TODO: if error is about loft/loft.meta/loft.meta.value/loft.meta.key not found, it probably means the schema is not there at all -> NotFoundError
 	if queryErr != nil {
-		return -1, queryErr
+		switch queryErr.Error() {
+		case "pq: relation \"loft\" does not exist":
+			return -1, NewNotFoundError("Schema 'loft' does not exist")
+		default:
+			return -1, queryErr
+		}
 	}
 	defer rows.Close()
 
