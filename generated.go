@@ -102,12 +102,15 @@ type ComplexityRoot struct {
 }
 
 type LoftResolver interface {
+	ID(ctx context.Context, obj *models.Loft) (string, error)
+
+	MembersCount(ctx context.Context, obj *models.Loft) (int, error)
 	Members(ctx context.Context, obj *models.Loft) ([]Member, error)
-
+	TasksCount(ctx context.Context, obj *models.Loft) (int, error)
 	Tasks(ctx context.Context, obj *models.Loft) ([]Task, error)
-
+	EventsCount(ctx context.Context, obj *models.Loft) (int, error)
 	Events(ctx context.Context, obj *models.Loft) ([]Event, error)
-
+	RequestsCount(ctx context.Context, obj *models.Loft) (int, error)
 	Requests(ctx context.Context, obj *models.Loft) ([]Request, error)
 }
 type MutationResolver interface {
@@ -770,20 +773,28 @@ func (ec *executionContext) _Loft(ctx context.Context, sel ast.SelectionSet, obj
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Loft")
 		case "id":
-			out.Values[i] = ec._Loft_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Loft_id(ctx, field, obj)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
 		case "name":
 			out.Values[i] = ec._Loft_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
 		case "membersCount":
-			out.Values[i] = ec._Loft_membersCount(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Loft_membersCount(ctx, field, obj)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
 		case "members":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -794,10 +805,14 @@ func (ec *executionContext) _Loft(ctx context.Context, sel ast.SelectionSet, obj
 				wg.Done()
 			}(i, field)
 		case "tasksCount":
-			out.Values[i] = ec._Loft_tasksCount(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Loft_tasksCount(ctx, field, obj)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
 		case "tasks":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -808,10 +823,14 @@ func (ec *executionContext) _Loft(ctx context.Context, sel ast.SelectionSet, obj
 				wg.Done()
 			}(i, field)
 		case "eventsCount":
-			out.Values[i] = ec._Loft_eventsCount(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Loft_eventsCount(ctx, field, obj)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
 		case "events":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -822,10 +841,14 @@ func (ec *executionContext) _Loft(ctx context.Context, sel ast.SelectionSet, obj
 				wg.Done()
 			}(i, field)
 		case "requestsCount":
-			out.Values[i] = ec._Loft_requestsCount(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Loft_requestsCount(ctx, field, obj)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
 		case "requests":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -859,7 +882,7 @@ func (ec *executionContext) _Loft_id(ctx context.Context, field graphql.Collecte
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
+		return ec.resolvers.Loft().ID(rctx, obj)
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -913,7 +936,7 @@ func (ec *executionContext) _Loft_membersCount(ctx context.Context, field graphq
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.MembersCount, nil
+		return ec.resolvers.Loft().MembersCount(rctx, obj)
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -1000,7 +1023,7 @@ func (ec *executionContext) _Loft_tasksCount(ctx context.Context, field graphql.
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.TasksCount, nil
+		return ec.resolvers.Loft().TasksCount(rctx, obj)
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -1087,7 +1110,7 @@ func (ec *executionContext) _Loft_eventsCount(ctx context.Context, field graphql
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.EventsCount, nil
+		return ec.resolvers.Loft().EventsCount(rctx, obj)
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -1174,7 +1197,7 @@ func (ec *executionContext) _Loft_requestsCount(ctx context.Context, field graph
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.RequestsCount, nil
+		return ec.resolvers.Loft().RequestsCount(rctx, obj)
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {

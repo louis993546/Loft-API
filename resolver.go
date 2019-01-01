@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"time"
 
+	"github.com/gofrs/uuid"
 	"github.com/louistsaitszho/loft/models"
 )
 
@@ -37,13 +38,28 @@ func (r *Resolver) Query() QueryResolver {
 
 type loftResolver struct{ *Resolver }
 
+func (r *loftResolver) ID(ctx context.Context, obj *models.Loft) (string, error) {
+	panic("not implemented")
+}
+func (r *loftResolver) MembersCount(ctx context.Context, obj *models.Loft) (int, error) {
+	panic("not implemented")
+}
 func (r *loftResolver) Members(ctx context.Context, obj *models.Loft) ([]Member, error) {
+	panic("not implemented")
+}
+func (r *loftResolver) TasksCount(ctx context.Context, obj *models.Loft) (int, error) {
 	panic("not implemented")
 }
 func (r *loftResolver) Tasks(ctx context.Context, obj *models.Loft) ([]Task, error) {
 	panic("not implemented")
 }
+func (r *loftResolver) EventsCount(ctx context.Context, obj *models.Loft) (int, error) {
+	panic("not implemented")
+}
 func (r *loftResolver) Events(ctx context.Context, obj *models.Loft) ([]Event, error) {
+	panic("not implemented")
+}
+func (r *loftResolver) RequestsCount(ctx context.Context, obj *models.Loft) (int, error) {
 	panic("not implemented")
 }
 func (r *loftResolver) Requests(ctx context.Context, obj *models.Loft) ([]Request, error) {
@@ -81,7 +97,7 @@ func (r *queryResolver) Lofts(ctx context.Context) ([]models.Loft, error) {
 	var lofts []models.Loft
 	for rows.Next() {
 		var (
-			id              string
+			id              string //TODO: I think uuid package has build-in sql support
 			name            string
 			joinCode        string
 			createdAtString string //TODO: parse it to time instead?
@@ -89,13 +105,13 @@ func (r *queryResolver) Lofts(ctx context.Context) ([]models.Loft, error) {
 		if scanErr := rows.Scan(&id, &name, &joinCode, &createdAtString); scanErr != nil {
 			panic("not implemented: should i skip this one or go straight to nil, error?")
 		}
+		loftUUID, uuidErr := uuid.FromString(id)
+		if uuidErr != nil {
+			panic("not implemented: if this happens it means the database is screwed, right?")
+		}
 		lofts = append(lofts, models.Loft{
-			ID:            id,
-			Name:          name,
-			MembersCount:  0, //TODO: sql query don't have that yet
-			TasksCount:    0, //TODO: sql query don't have that yet
-			EventsCount:   0, //TODO: sql query don't have that yet
-			RequestsCount: 0, //TODO: sql query don't have that yet
+			ID:   loftUUID,
+			Name: name,
 		})
 	}
 
