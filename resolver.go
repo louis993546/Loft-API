@@ -3,6 +3,8 @@ package loft
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"log"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -39,27 +41,37 @@ func (r *Resolver) Query() QueryResolver {
 type loftResolver struct{ *Resolver }
 
 func (r *loftResolver) ID(ctx context.Context, obj *models.Loft) (string, error) {
-	panic("not implemented")
+	//TODO: replace it with external marshaler (https://gqlgen.com/reference/scalars/)
+	return obj.ID.String(), nil
 }
 func (r *loftResolver) MembersCount(ctx context.Context, obj *models.Loft) (int, error) {
+	query := fmt.Sprintf("SELECT COUNT(*) FROM loft.member WHERE loft.member.loft_id=%s", obj.ID.String())
+	log.Println(query)
 	panic("not implemented")
 }
 func (r *loftResolver) Members(ctx context.Context, obj *models.Loft) ([]Member, error) {
+
 	panic("not implemented")
 }
 func (r *loftResolver) TasksCount(ctx context.Context, obj *models.Loft) (int, error) {
+	query := fmt.Sprintf("SELECT COUNT(*) FROM loft.task WHERE loft.task.loft_id=%s", obj.ID.String())
+	log.Println(query)
 	panic("not implemented")
 }
 func (r *loftResolver) Tasks(ctx context.Context, obj *models.Loft) ([]Task, error) {
 	panic("not implemented")
 }
 func (r *loftResolver) EventsCount(ctx context.Context, obj *models.Loft) (int, error) {
+	query := fmt.Sprintf("SELECT COUNT(*) FROM loft.event WHERE loft.event.loft_id=%s", obj.ID.String())
+	log.Println(query)
 	panic("not implemented")
 }
 func (r *loftResolver) Events(ctx context.Context, obj *models.Loft) ([]Event, error) {
 	panic("not implemented")
 }
 func (r *loftResolver) RequestsCount(ctx context.Context, obj *models.Loft) (int, error) {
+	query := fmt.Sprintf("SELECT COUNT(*) FROM loft.join_request WHERE loft.join_request.loft_id=%s", obj.ID.String())
+	log.Println(query)
 	panic("not implemented")
 }
 func (r *loftResolver) Requests(ctx context.Context, obj *models.Loft) ([]Request, error) {
