@@ -71,7 +71,35 @@ func (r *mutationResolver) CreateLoftAndMember(ctx context.Context, input *NewLo
 type queryResolver struct{ *Resolver }
 
 func (r *queryResolver) Lofts(ctx context.Context) ([]models.Loft, error) {
-	panic("not implemented")
+	query := "SELECT loft.loft.id, loft.loft.\"name\", loft.loft.join_code, loft.loft.created_at FROM loft.loft;"
+	rows, queryErr := r.db.Query(query)
+	if queryErr != nil {
+		panic("not implemented: find out what can heppen, and what is recoverable and how")
+	}
+	defer rows.Close()
+
+	var lofts []models.Loft
+	for rows.Next() {
+		var (
+			id              string
+			name            string
+			joinCode        string
+			createdAtString string //TODO: parse it to time instead?
+		)
+		if scanErr := rows.Scan(&id, &name, &joinCode, &createdAtString); scanErr != nil {
+			panic("not implemented: should i skip this one or go straight to nil, error?")
+		}
+		lofts = append(lofts, models.Loft{
+			ID:            id,
+			Name:          name,
+			MembersCount:  0, //TODO: sql query don't have that yet
+			TasksCount:    0, //TODO: sql query don't have that yet
+			EventsCount:   0, //TODO: sql query don't have that yet
+			RequestsCount: 0, //TODO: sql query don't have that yet
+		})
+	}
+
+	return lofts, nil
 }
 func (r *queryResolver) Loft(ctx context.Context, id string) (*models.Loft, error) {
 	panic("not implemented")
