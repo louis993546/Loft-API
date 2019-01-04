@@ -21,6 +21,9 @@ type Resolver struct {
 	tasksStmt             *sql.Stmt
 	eventCountStmt        *sql.Stmt
 	eventsStmt            *sql.Stmt
+	noteCountStml         *sql.Stmt
+	notesStmt             *sql.Stmt
+	loftStmt              *sql.Stmt
 }
 
 // NewResolver is essentially the constructor for Resolver. It reminds user that they should give Resolver a db to access
@@ -50,6 +53,18 @@ func NewResolver(db *sql.DB) *Resolver {
 	if eErr != nil {
 		log.Panicf("Invalid query for events: %e\n", eErr)
 	}
+	noteCountStmt, ncErr := db.Prepare("SELECT COUNT(*) FROM loft.note WHERE loft.note.loft_id=?;")
+	if ncErr != nil {
+		log.Panicf("Invalid query for note count: %e\n", ncErr)
+	}
+	notesStmt, nErr := db.Prepare("SELECT * FROM loft.note WHERE loft.note.loft_id=?;")
+	if nErr != nil {
+		log.Panicf("Invalid query for note: %e\n", nErr)
+	}
+	loftStmt, lErr := db.Prepare("SELECT * FROM loft.loft WHERE loft.loft.id=?;")
+	if lErr != nil {
+		log.Panicf("Invalid query for loft: %e\n", lErr)
+	}
 	return &Resolver{
 		dbAreYouSureAboutThis: db,
 		memberCountStmt:       memberCountStmt,
@@ -58,6 +73,9 @@ func NewResolver(db *sql.DB) *Resolver {
 		tasksStmt:             tasksStmt,
 		eventCountStmt:        eventCountStmt,
 		eventsStmt:            eventsStmt,
+		noteCountStml:         noteCountStmt,
+		notesStmt:             notesStmt,
+		loftStmt:              loftStmt,
 	}
 }
 
