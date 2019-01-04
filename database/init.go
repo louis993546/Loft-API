@@ -29,6 +29,8 @@ func GetSchemaVersion(db *sql.DB) (int, error) {
 		switch queryErr.Error() {
 		case "pq: relation \"loft\" does not exist":
 			return -1, NewNotFoundError("Schema 'loft' does not exist")
+		case "pq: relation \"loft.meta\" does not exist":
+			return -1, NewNotFoundError("Table 'loft.meta' does not exist")
 		default:
 			//TODO: find out what other kinds of error can happen
 			return -1, queryErr
