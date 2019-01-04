@@ -157,15 +157,15 @@ func (r *loftResolver) NotesCount(ctx context.Context, obj *models.Loft) (int, e
 	return count, nil
 }
 func (r *loftResolver) JoinRequestsCount(ctx context.Context, obj *models.Loft) (int, error) {
-	panic("not implemented")
-}
-func (r *loftResolver) JoinRequests(ctx context.Context, obj *models.Loft) ([]JoinRequest, error) {
 	row := r.joinRequestCountStmt.QueryRow(obj.ID)
 	var count int
 	if scanErr := row.Scan(&count); scanErr != nil {
 		return -1, scanErr
 	}
 	return count, nil
+}
+func (r *loftResolver) JoinRequests(ctx context.Context, obj *models.Loft) ([]JoinRequest, error) {
+	panic("not implemented")
 }
 
 type mutationResolver struct{ *Resolver }
