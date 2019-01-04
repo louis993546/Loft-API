@@ -109,14 +109,14 @@ func (r *queryResolver) Lofts(ctx context.Context) ([]models.Loft, error) {
 	query := "SELECT loft.loft.id, loft.loft.\"name\", loft.loft.join_code, loft.loft.created_at FROM loft.loft;"
 	rows, queryErr := r.db.Query(query)
 	if queryErr != nil {
-		panic("not implemented: find out what can heppen, and what is recoverable and how")
+		panic("not implemented: find out what can happen, and what is recoverable and how")
 	}
 	defer rows.Close()
 
 	var lofts []models.Loft
 	for rows.Next() {
 		var (
-			id              string //TODO: I think uuid package has build-in sql support
+			id              uuid.UUID //TODO: I think uuid package has build-in sql support
 			name            string
 			joinCode        string
 			createdAtString string //TODO: parse it to time instead?
@@ -124,13 +124,10 @@ func (r *queryResolver) Lofts(ctx context.Context) ([]models.Loft, error) {
 		if scanErr := rows.Scan(&id, &name, &joinCode, &createdAtString); scanErr != nil {
 			panic("not implemented: should i skip this one or go straight to nil, error?")
 		}
-		loftUUID, uuidErr := uuid.FromString(id)
-		if uuidErr != nil {
-			panic("not implemented: if this happens it means the database is screwed, right?")
-		}
 		lofts = append(lofts, models.Loft{
-			ID:   loftUUID,
+			ID:   id,
 			Name: name,
+			//TODO: join code and created at  missing
 		})
 	}
 
