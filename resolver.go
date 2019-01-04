@@ -32,47 +32,47 @@ type Resolver struct {
 func NewResolver(db *sql.DB) *Resolver {
 	memberCountStmt, mcErr := db.Prepare("SELECT COUNT(*) FROM loft.member WHERE loft.member.loft_id=?;")
 	if mcErr != nil {
-		log.Panicf("Invalid query for member count: %e\n", mcErr)
+		log.Panicf("Invalid query for member count: '%v'\n", mcErr)
 	}
 	membersStmt, mErr := db.Prepare("SELECT * FROM loft.member WHERE loft.member.loft_id=?;")
 	if mErr != nil {
-		log.Panicf("Invalid query for members: %e\n", mErr)
+		log.Panicf("Invalid query for members: '%v'\n", mErr)
 	}
 	taskCountStmt, tcErr := db.Prepare("SELECT COUNT(*) FROM loft.task WHERE loft.task.loft_id=?;")
 	if tcErr != nil {
-		log.Panicf("Invalid query for task count: %e\n", tcErr)
+		log.Panicf("Invalid query for task count: '%v'\n", tcErr)
 	}
 	tasksStmt, tErr := db.Prepare("SELECT * FROM loft.task WHERE loft.task.loft_id=?;")
 	if tErr != nil {
-		log.Panicf("Invalid query for tasks: %e\n", tErr)
+		log.Panicf("Invalid query for tasks: '%v'\n", tErr)
 	}
 	eventCountStmt, ecErr := db.Prepare("SELECT COUNT(*) FROM loft.event WHERE loft.event.loft_id=?;")
 	if ecErr != nil {
-		log.Panicf("Invalid query for event count: %e\n", ecErr)
+		log.Panicf("Invalid query for event count: '%v'\n", ecErr)
 	}
 	eventsStmt, eErr := db.Prepare("SELECT * FROM loft.event WHERE loft.event.loft_id=?;")
 	if eErr != nil {
-		log.Panicf("Invalid query for events: %e\n", eErr)
+		log.Panicf("Invalid query for events: '%v'\n", eErr)
 	}
 	noteCountStmt, ncErr := db.Prepare("SELECT COUNT(*) FROM loft.note WHERE loft.note.loft_id=?;")
 	if ncErr != nil {
-		log.Panicf("Invalid query for note count: %e\n", ncErr)
+		log.Panicf("Invalid query for note count: '%v'\n", ncErr)
 	}
 	notesStmt, nErr := db.Prepare("SELECT * FROM loft.note WHERE loft.note.loft_id=?;")
 	if nErr != nil {
-		log.Panicf("Invalid query for note: %e\n", nErr)
+		log.Panicf("Invalid query for note: '%v'\n", nErr)
 	}
 	loftStmt, lErr := db.Prepare("SELECT * FROM loft.loft WHERE loft.loft.id=?;")
 	if lErr != nil {
-		log.Panicf("Invalid query for loft: %e\n", lErr)
+		log.Panicf("Invalid query for loft: '%v'\n", lErr)
 	}
 	joinRequestCountStmt, jrcErr := db.Prepare("SELECT COUNT(*) FROM loft.join_request WHERE loft.join_request.loft_id=?;")
 	if jrcErr != nil {
-		log.Panicf("Invalid query for join request count: %e\n", jrcErr)
+		log.Panicf("Invalid query for join request count: '%v'\n", jrcErr)
 	}
 	joinRequestStmt, jrErr := db.Prepare("SELECT * FROM loft.join_request WHERE loft.join_request.loft_id=?;")
 	if jrErr != nil {
-		log.Panicf("Invalid query for join requests: %e\n", jrErr)
+		log.Panicf("Invalid query for join requests: '%v'\n", jrErr)
 	}
 
 	return &Resolver{

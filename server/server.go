@@ -36,7 +36,7 @@ func main() {
 			log.Printf("Cause of not found: '%v'\n", err)
 			initErr := database.InitializeDatabase(db)
 			if initErr != nil {
-				log.Fatalf("Failed to init database: '%v'", initErr)
+				log.Fatalf("Failed to init database: '%v'\n", initErr)
 			}
 		case *database.ErrorCorrupted:
 			log.Panicln("not implemented")

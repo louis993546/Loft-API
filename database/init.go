@@ -22,6 +22,8 @@ func InitializeDatabase(db *sql.DB) error {
 }
 
 // GetSchemaVersion goes to db and get's the schema version from it.
+// TODO: Pretty sure there's a table of what table exists. Use that to check if it is NotFoundError
+// TODO: split not found out to it's own func
 func GetSchemaVersion(db *sql.DB) (int, error) {
 	//TODO: QueryRow seems to be better?
 	rows, queryErr := db.Query("SELECT loft.meta.value FROM loft.meta WHERE loft.meta.key='SCHEMA_VERSION';")
