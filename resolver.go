@@ -3,7 +3,6 @@ package loft
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"log"
 	"time"
 
@@ -12,7 +11,7 @@ import (
 )
 
 // Resolver is the entry point to how the query tree got processed
-// dbAreYouSureAboutThis is pretty much temporary only. They should be prepared on server start-up (fail-fast)
+// dbAreYouSureAboutThis is temporary only. All queries should be prepared on server start-up (fail-fast)
 type Resolver struct {
 	dbAreYouSureAboutThis *sql.DB
 	memberCountStmt       *sql.Stmt
@@ -24,6 +23,8 @@ type Resolver struct {
 	noteCountStml         *sql.Stmt
 	notesStmt             *sql.Stmt
 	loftStmt              *sql.Stmt
+	joinRequestCountStmt  *sql.Stmt
+	joinRequestStmt       *sql.Stmt
 }
 
 // NewResolver is essentially the constructor for Resolver. It reminds user that they should give Resolver a db to access
@@ -65,6 +66,15 @@ func NewResolver(db *sql.DB) *Resolver {
 	if lErr != nil {
 		log.Panicf("Invalid query for loft: %e\n", lErr)
 	}
+	joinRequestCountStmt, jrcErr := db.Prepare("SELECT COUNT(*) FROM loft.join_request WHERE loft.join_request.loft_id=?;")
+	if jrcErr != nil {
+		log.Panicf("Invalid query for join request count: %e\n", jrcErr)
+	}
+	joinRequestStmt, jrErr := db.Prepare("SELECT * FROM loft.join_request WHERE loft.join_request.loft_id=?;")
+	if jrErr != nil {
+		log.Panicf("Invalid query for join requests: %e\n", jrErr)
+	}
+
 	return &Resolver{
 		dbAreYouSureAboutThis: db,
 		memberCountStmt:       memberCountStmt,
@@ -76,6 +86,8 @@ func NewResolver(db *sql.DB) *Resolver {
 		noteCountStml:         noteCountStmt,
 		notesStmt:             notesStmt,
 		loftStmt:              loftStmt,
+		joinRequestCountStmt:  joinRequestCountStmt,
+		joinRequestStmt:       joinRequestStmt,
 	}
 }
 
@@ -118,14 +130,16 @@ func (r *loftResolver) EventsCount(ctx context.Context, obj *models.Loft) (int, 
 func (r *loftResolver) Events(ctx context.Context, obj *models.Loft) ([]Event, error) {
 	panic("not implemented")
 }
-func (r *loftResolver) RequestsCount(ctx context.Context, obj *models.Loft) (int, error) {
-	query := fmt.Sprintf("SELECT COUNT(*) FROM loft.join_request WHERE loft.join_request.loft_id=%s;", obj.ID.String())
-	log.Println(query)
+func (r *loftResolver) Notes(ctx context.Context, obj *models.Loft) ([]Note, error) {
 	panic("not implemented")
 }
-func (r *loftResolver) Requests(ctx context.Context, obj *models.Loft) ([]Request, error) {
-	query := fmt.Sprintf("SELECT * FROM loft.join_request WHERE loft.join_request.loft_id=%s;", obj.ID.String())
-	log.Println(query)
+func (r *loftResolver) NotesCount(ctx context.Context, obj *models.Loft) (int, error) {
+	panic("not implemented")
+}
+func (r *loftResolver) JoinRequestsCount(ctx context.Context, obj *models.Loft) (int, error) {
+	panic("not implemented")
+}
+func (r *loftResolver) JoinRequests(ctx context.Context, obj *models.Loft) ([]JoinRequest, error) {
 	panic("not implemented")
 }
 
@@ -137,7 +151,7 @@ func (r *mutationResolver) CreateTask(ctx context.Context, input NewTask) (Task,
 func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (Event, error) {
 	panic("not implemented")
 }
-func (r *mutationResolver) CreateRequest(ctx context.Context, input NewRequest) (Request, error) {
+func (r *mutationResolver) CreateRequest(ctx context.Context, input NewRequest) (JoinRequest, error) {
 	panic("not implemented")
 }
 func (r *mutationResolver) CreateLoft(ctx context.Context, input NewLoft) (models.Loft, error) {
@@ -160,7 +174,7 @@ func (r *queryResolver) Lofts(ctx context.Context) ([]models.Loft, error) {
 	var lofts []models.Loft
 	for rows.Next() {
 		var (
-			id              uuid.UUID //TODO: I think uuid package has build-in sql support
+			id              uuid.UUID
 			name            string
 			joinCode        string
 			createdAtString string //TODO: parse it to time instead?
@@ -169,9 +183,10 @@ func (r *queryResolver) Lofts(ctx context.Context) ([]models.Loft, error) {
 			panic("not implemented: should i skip this one or go straight to nil, error?")
 		}
 		lofts = append(lofts, models.Loft{
-			ID:   id,
-			Name: name,
-			//TODO: join code and created at  missing
+			ID:       id,
+			Name:     name,
+			JoinCode: joinCode,
+			//TODO: created at  missing
 		})
 	}
 

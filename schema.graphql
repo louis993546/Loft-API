@@ -43,7 +43,7 @@ type Note {
   content: String!
 }
 
-type Request {
+type JoinRequest {
   id: ID!
   name: String!
   message: String!
@@ -111,7 +111,7 @@ input NewLoftNewMember {
 type Mutation {
   createTask(input: NewTask!): Task!
   createEvent(input: NewEvent!): Event!
-  createRequest(input: NewRequest!): Request!
+  createRequest(input: NewRequest!): JoinRequest!
   createLoft(input: NewLoft!): Loft!  # TODO: probably different for production
   createLoftAndMember(input: NewLoftNewMember): LoftAndFirstMember!
 }

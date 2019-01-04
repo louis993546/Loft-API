@@ -47,21 +47,31 @@ type ComplexityRoot struct {
 	}
 
 	Event struct {
-		Id   func(childComplexity int) int
-		Name func(childComplexity int) int
+		Id      func(childComplexity int) int
+		Title   func(childComplexity int) int
+		Creator func(childComplexity int) int
+	}
+
+	JoinRequest struct {
+		Id      func(childComplexity int) int
+		Name    func(childComplexity int) int
+		Message func(childComplexity int) int
 	}
 
 	Loft struct {
-		Id            func(childComplexity int) int
-		Name          func(childComplexity int) int
-		MembersCount  func(childComplexity int) int
-		Members       func(childComplexity int) int
-		TasksCount    func(childComplexity int) int
-		Tasks         func(childComplexity int) int
-		EventsCount   func(childComplexity int) int
-		Events        func(childComplexity int) int
-		RequestsCount func(childComplexity int) int
-		Requests      func(childComplexity int) int
+		Id                func(childComplexity int) int
+		Name              func(childComplexity int) int
+		JoinCode          func(childComplexity int) int
+		MembersCount      func(childComplexity int) int
+		Members           func(childComplexity int) int
+		TasksCount        func(childComplexity int) int
+		Tasks             func(childComplexity int) int
+		EventsCount       func(childComplexity int) int
+		Events            func(childComplexity int) int
+		Notes             func(childComplexity int) int
+		NotesCount        func(childComplexity int) int
+		JoinRequestsCount func(childComplexity int) int
+		JoinRequests      func(childComplexity int) int
 	}
 
 	LoftAndFirstMember struct {
@@ -70,8 +80,9 @@ type ComplexityRoot struct {
 	}
 
 	Member struct {
-		Id   func(childComplexity int) int
-		Name func(childComplexity int) int
+		Id         func(childComplexity int) int
+		Name       func(childComplexity int) int
+		ApprovedBy func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -82,22 +93,25 @@ type ComplexityRoot struct {
 		CreateLoftAndMember func(childComplexity int, input *NewLoftNewMember) int
 	}
 
+	Note struct {
+		Id      func(childComplexity int) int
+		Creator func(childComplexity int) int
+		Format  func(childComplexity int) int
+		Content func(childComplexity int) int
+	}
+
 	Query struct {
 		Lofts func(childComplexity int) int
 		Loft  func(childComplexity int, id string) int
 		Echo  func(childComplexity int) int
 	}
 
-	Request struct {
-		Id      func(childComplexity int) int
-		Name    func(childComplexity int) int
-		Message func(childComplexity int) int
-	}
-
 	Task struct {
-		Id    func(childComplexity int) int
-		Title func(childComplexity int) int
-		State func(childComplexity int) int
+		Id       func(childComplexity int) int
+		Title    func(childComplexity int) int
+		State    func(childComplexity int) int
+		Creator  func(childComplexity int) int
+		Assignee func(childComplexity int) int
 	}
 }
 
@@ -110,13 +124,15 @@ type LoftResolver interface {
 	Tasks(ctx context.Context, obj *models.Loft) ([]Task, error)
 	EventsCount(ctx context.Context, obj *models.Loft) (int, error)
 	Events(ctx context.Context, obj *models.Loft) ([]Event, error)
-	RequestsCount(ctx context.Context, obj *models.Loft) (int, error)
-	Requests(ctx context.Context, obj *models.Loft) ([]Request, error)
+	Notes(ctx context.Context, obj *models.Loft) ([]Note, error)
+	NotesCount(ctx context.Context, obj *models.Loft) (int, error)
+	JoinRequestsCount(ctx context.Context, obj *models.Loft) (int, error)
+	JoinRequests(ctx context.Context, obj *models.Loft) ([]JoinRequest, error)
 }
 type MutationResolver interface {
 	CreateTask(ctx context.Context, input NewTask) (Task, error)
 	CreateEvent(ctx context.Context, input NewEvent) (Event, error)
-	CreateRequest(ctx context.Context, input NewRequest) (Request, error)
+	CreateRequest(ctx context.Context, input NewRequest) (JoinRequest, error)
 	CreateLoft(ctx context.Context, input NewLoft) (models.Loft, error)
 	CreateLoftAndMember(ctx context.Context, input *NewLoftNewMember) (LoftAndFirstMember, error)
 }
@@ -300,12 +316,40 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Event.Id(childComplexity), true
 
-	case "Event.name":
-		if e.complexity.Event.Name == nil {
+	case "Event.title":
+		if e.complexity.Event.Title == nil {
 			break
 		}
 
-		return e.complexity.Event.Name(childComplexity), true
+		return e.complexity.Event.Title(childComplexity), true
+
+	case "Event.creator":
+		if e.complexity.Event.Creator == nil {
+			break
+		}
+
+		return e.complexity.Event.Creator(childComplexity), true
+
+	case "JoinRequest.id":
+		if e.complexity.JoinRequest.Id == nil {
+			break
+		}
+
+		return e.complexity.JoinRequest.Id(childComplexity), true
+
+	case "JoinRequest.name":
+		if e.complexity.JoinRequest.Name == nil {
+			break
+		}
+
+		return e.complexity.JoinRequest.Name(childComplexity), true
+
+	case "JoinRequest.message":
+		if e.complexity.JoinRequest.Message == nil {
+			break
+		}
+
+		return e.complexity.JoinRequest.Message(childComplexity), true
 
 	case "Loft.id":
 		if e.complexity.Loft.Id == nil {
@@ -320,6 +364,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Loft.Name(childComplexity), true
+
+	case "Loft.joinCode":
+		if e.complexity.Loft.JoinCode == nil {
+			break
+		}
+
+		return e.complexity.Loft.JoinCode(childComplexity), true
 
 	case "Loft.membersCount":
 		if e.complexity.Loft.MembersCount == nil {
@@ -363,19 +414,33 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Loft.Events(childComplexity), true
 
-	case "Loft.requestsCount":
-		if e.complexity.Loft.RequestsCount == nil {
+	case "Loft.notes":
+		if e.complexity.Loft.Notes == nil {
 			break
 		}
 
-		return e.complexity.Loft.RequestsCount(childComplexity), true
+		return e.complexity.Loft.Notes(childComplexity), true
 
-	case "Loft.requests":
-		if e.complexity.Loft.Requests == nil {
+	case "Loft.notesCount":
+		if e.complexity.Loft.NotesCount == nil {
 			break
 		}
 
-		return e.complexity.Loft.Requests(childComplexity), true
+		return e.complexity.Loft.NotesCount(childComplexity), true
+
+	case "Loft.joinRequestsCount":
+		if e.complexity.Loft.JoinRequestsCount == nil {
+			break
+		}
+
+		return e.complexity.Loft.JoinRequestsCount(childComplexity), true
+
+	case "Loft.joinRequests":
+		if e.complexity.Loft.JoinRequests == nil {
+			break
+		}
+
+		return e.complexity.Loft.JoinRequests(childComplexity), true
 
 	case "LoftAndFirstMember.loft":
 		if e.complexity.LoftAndFirstMember.Loft == nil {
@@ -404,6 +469,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Member.Name(childComplexity), true
+
+	case "Member.approvedBy":
+		if e.complexity.Member.ApprovedBy == nil {
+			break
+		}
+
+		return e.complexity.Member.ApprovedBy(childComplexity), true
 
 	case "Mutation.createTask":
 		if e.complexity.Mutation.CreateTask == nil {
@@ -465,6 +537,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateLoftAndMember(childComplexity, args["input"].(*NewLoftNewMember)), true
 
+	case "Note.id":
+		if e.complexity.Note.Id == nil {
+			break
+		}
+
+		return e.complexity.Note.Id(childComplexity), true
+
+	case "Note.creator":
+		if e.complexity.Note.Creator == nil {
+			break
+		}
+
+		return e.complexity.Note.Creator(childComplexity), true
+
+	case "Note.format":
+		if e.complexity.Note.Format == nil {
+			break
+		}
+
+		return e.complexity.Note.Format(childComplexity), true
+
+	case "Note.content":
+		if e.complexity.Note.Content == nil {
+			break
+		}
+
+		return e.complexity.Note.Content(childComplexity), true
+
 	case "Query.lofts":
 		if e.complexity.Query.Lofts == nil {
 			break
@@ -491,27 +591,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Echo(childComplexity), true
 
-	case "Request.id":
-		if e.complexity.Request.Id == nil {
-			break
-		}
-
-		return e.complexity.Request.Id(childComplexity), true
-
-	case "Request.name":
-		if e.complexity.Request.Name == nil {
-			break
-		}
-
-		return e.complexity.Request.Name(childComplexity), true
-
-	case "Request.message":
-		if e.complexity.Request.Message == nil {
-			break
-		}
-
-		return e.complexity.Request.Message(childComplexity), true
-
 	case "Task.id":
 		if e.complexity.Task.Id == nil {
 			break
@@ -532,6 +611,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Task.State(childComplexity), true
+
+	case "Task.creator":
+		if e.complexity.Task.Creator == nil {
+			break
+		}
+
+		return e.complexity.Task.Creator(childComplexity), true
+
+	case "Task.Assignee":
+		if e.complexity.Task.Assignee == nil {
+			break
+		}
+
+		return e.complexity.Task.Assignee(childComplexity), true
 
 	}
 	return 0, false
@@ -687,8 +780,13 @@ func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "name":
-			out.Values[i] = ec._Event_name(ctx, field, obj)
+		case "title":
+			out.Values[i] = ec._Event_title(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "creator":
+			out.Values[i] = ec._Event_creator(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -731,7 +829,7 @@ func (ec *executionContext) _Event_id(ctx context.Context, field graphql.Collect
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Event_name(ctx context.Context, field graphql.CollectedField, obj *Event) graphql.Marshaler {
+func (ec *executionContext) _Event_title(ctx context.Context, field graphql.CollectedField, obj *Event) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -743,7 +841,156 @@ func (ec *executionContext) _Event_name(ctx context.Context, field graphql.Colle
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
+		return obj.Title, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Event_creator(ctx context.Context, field graphql.CollectedField, obj *Event) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Event",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Creator, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(Member)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._Member(ctx, field.Selections, &res)
+}
+
+var joinRequestImplementors = []string{"JoinRequest"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _JoinRequest(ctx context.Context, sel ast.SelectionSet, obj *JoinRequest) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, joinRequestImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("JoinRequest")
+		case "id":
+			out.Values[i] = ec._JoinRequest_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "name":
+			out.Values[i] = ec._JoinRequest_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "message":
+			out.Values[i] = ec._JoinRequest_message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _JoinRequest_id(ctx context.Context, field graphql.CollectedField, obj *JoinRequest) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "JoinRequest",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalID(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _JoinRequest_name(ctx context.Context, field graphql.CollectedField, obj *JoinRequest) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "JoinRequest",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _JoinRequest_message(ctx context.Context, field graphql.CollectedField, obj *JoinRequest) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "JoinRequest",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Message, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -783,6 +1030,11 @@ func (ec *executionContext) _Loft(ctx context.Context, sel ast.SelectionSet, obj
 			}(i, field)
 		case "name":
 			out.Values[i] = ec._Loft_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "joinCode":
+			out.Values[i] = ec._Loft_joinCode(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -840,19 +1092,37 @@ func (ec *executionContext) _Loft(ctx context.Context, sel ast.SelectionSet, obj
 				}
 				wg.Done()
 			}(i, field)
-		case "requestsCount":
+		case "notes":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
-				out.Values[i] = ec._Loft_requestsCount(ctx, field, obj)
+				out.Values[i] = ec._Loft_notes(ctx, field, obj)
 				if out.Values[i] == graphql.Null {
 					invalid = true
 				}
 				wg.Done()
 			}(i, field)
-		case "requests":
+		case "notesCount":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
-				out.Values[i] = ec._Loft_requests(ctx, field, obj)
+				out.Values[i] = ec._Loft_notesCount(ctx, field, obj)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
+		case "joinRequestsCount":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Loft_joinRequestsCount(ctx, field, obj)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
+		case "joinRequests":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Loft_joinRequests(ctx, field, obj)
 				if out.Values[i] == graphql.Null {
 					invalid = true
 				}
@@ -910,6 +1180,33 @@ func (ec *executionContext) _Loft_name(ctx context.Context, field graphql.Collec
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Loft_joinCode(ctx context.Context, field graphql.CollectedField, obj *models.Loft) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Loft",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.JoinCode, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -1185,7 +1482,7 @@ func (ec *executionContext) _Loft_events(ctx context.Context, field graphql.Coll
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Loft_requestsCount(ctx context.Context, field graphql.CollectedField, obj *models.Loft) graphql.Marshaler {
+func (ec *executionContext) _Loft_notes(ctx context.Context, field graphql.CollectedField, obj *models.Loft) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -1197,7 +1494,7 @@ func (ec *executionContext) _Loft_requestsCount(ctx context.Context, field graph
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Loft().RequestsCount(rctx, obj)
+		return ec.resolvers.Loft().Notes(rctx, obj)
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -1205,34 +1502,7 @@ func (ec *executionContext) _Loft_requestsCount(ctx context.Context, field graph
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalInt(res)
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _Loft_requests(ctx context.Context, field graphql.CollectedField, obj *models.Loft) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "Loft",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Loft().Requests(rctx, obj)
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]Request)
+	res := resTmp.([]Note)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
@@ -1257,7 +1527,121 @@ func (ec *executionContext) _Loft_requests(ctx context.Context, field graphql.Co
 			}
 			arr1[idx1] = func() graphql.Marshaler {
 
-				return ec._Request(ctx, field.Selections, &res[idx1])
+				return ec._Note(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Loft_notesCount(ctx context.Context, field graphql.CollectedField, obj *models.Loft) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Loft",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Loft().NotesCount(rctx, obj)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalInt(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Loft_joinRequestsCount(ctx context.Context, field graphql.CollectedField, obj *models.Loft) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Loft",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Loft().JoinRequestsCount(rctx, obj)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalInt(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Loft_joinRequests(ctx context.Context, field graphql.CollectedField, obj *models.Loft) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Loft",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Loft().JoinRequests(rctx, obj)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]JoinRequest)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._JoinRequest(ctx, field.Selections, &res[idx1])
 			}()
 		}
 		if isLen1 {
@@ -1386,6 +1770,8 @@ func (ec *executionContext) _Member(ctx context.Context, sel ast.SelectionSet, o
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "approvedBy":
+			out.Values[i] = ec._Member_approvedBy(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1449,6 +1835,35 @@ func (ec *executionContext) _Member_name(ctx context.Context, field graphql.Coll
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Member_approvedBy(ctx context.Context, field graphql.CollectedField, obj *Member) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Member",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ApprovedBy, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*Member)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._Member(ctx, field.Selections, res)
 }
 
 var mutationImplementors = []string{"Mutation"}
@@ -1600,11 +2015,11 @@ func (ec *executionContext) _Mutation_createRequest(ctx context.Context, field g
 		}
 		return graphql.Null
 	}
-	res := resTmp.(Request)
+	res := resTmp.(JoinRequest)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
-	return ec._Request(ctx, field.Selections, &res)
+	return ec._JoinRequest(ctx, field.Selections, &res)
 }
 
 // nolint: vetshadow
@@ -1673,6 +2088,160 @@ func (ec *executionContext) _Mutation_createLoftAndMember(ctx context.Context, f
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._LoftAndFirstMember(ctx, field.Selections, &res)
+}
+
+var noteImplementors = []string{"Note"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _Note(ctx context.Context, sel ast.SelectionSet, obj *Note) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, noteImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Note")
+		case "id":
+			out.Values[i] = ec._Note_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "creator":
+			out.Values[i] = ec._Note_creator(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "format":
+			out.Values[i] = ec._Note_format(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "content":
+			out.Values[i] = ec._Note_content(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Note_id(ctx context.Context, field graphql.CollectedField, obj *Note) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Note",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalID(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Note_creator(ctx context.Context, field graphql.CollectedField, obj *Note) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Note",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Creator, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(Member)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._Member(ctx, field.Selections, &res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Note_format(ctx context.Context, field graphql.CollectedField, obj *Note) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Note",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Format, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(NoteFormat)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Note_content(ctx context.Context, field graphql.CollectedField, obj *Note) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Note",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Content, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
 }
 
 var queryImplementors = []string{"Query"}
@@ -1920,127 +2489,6 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	return ec.___Schema(ctx, field.Selections, res)
 }
 
-var requestImplementors = []string{"Request"}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _Request(ctx context.Context, sel ast.SelectionSet, obj *Request) graphql.Marshaler {
-	fields := graphql.CollectFields(ctx, sel, requestImplementors)
-
-	out := graphql.NewOrderedMap(len(fields))
-	invalid := false
-	for i, field := range fields {
-		out.Keys[i] = field.Alias
-
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Request")
-		case "id":
-			out.Values[i] = ec._Request_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "name":
-			out.Values[i] = ec._Request_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "message":
-			out.Values[i] = ec._Request_message(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-
-	if invalid {
-		return graphql.Null
-	}
-	return out
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _Request_id(ctx context.Context, field graphql.CollectedField, obj *Request) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "Request",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalID(res)
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _Request_name(ctx context.Context, field graphql.CollectedField, obj *Request) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "Request",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalString(res)
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _Request_message(ctx context.Context, field graphql.CollectedField, obj *Request) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "Request",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Message, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalString(res)
-}
-
 var taskImplementors = []string{"Task"}
 
 // nolint: gocyclo, errcheck, gas, goconst
@@ -2070,6 +2518,13 @@ func (ec *executionContext) _Task(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "creator":
+			out.Values[i] = ec._Task_creator(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "Assignee":
+			out.Values[i] = ec._Task_Assignee(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2160,6 +2615,63 @@ func (ec *executionContext) _Task_state(ctx context.Context, field graphql.Colle
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Task_creator(ctx context.Context, field graphql.CollectedField, obj *Task) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Task",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Creator, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(Member)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._Member(ctx, field.Selections, &res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Task_Assignee(ctx context.Context, field graphql.CollectedField, obj *Task) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Task",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Assignee, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*Member)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._Member(ctx, field.Selections, res)
 }
 
 var __DirectiveImplementors = []string{"__Directive"}
@@ -3762,6 +4274,8 @@ var parsedSchema = gqlparser.MustLoadSchema(
 type Member {
   id: ID!
   name: String!
+  # approvedAt:
+  approvedBy: Member
 }
 
 enum TaskState {
@@ -3773,30 +4287,55 @@ type Task {
   id: ID!
   title: String!
   state: TaskState!
+  # createdAt
+  creator: Member!
+  Assignee: Member
+  # dueAt
 }
 
 type Event {
   id: ID!
-  name: String!
+  title: String!
+  creator: Member!
+  # createdAt
+  # startTime
+  # endTime
 }
 
-type Request {
+enum NoteFormat {
+  COMMON_MARK
+}
+
+type Note {
+  id: ID!
+  creator: Member!,
+  # createdAt: 
+  format: NoteFormat!,
+  content: String!
+}
+
+type JoinRequest {
   id: ID!
   name: String!
   message: String!
+  # createdAt:
 }
 
 type Loft {
   id: ID!
   name: String!
+  joinCode: String!
+  # createdAt:
   membersCount: Int!
   members: [Member!]!
   tasksCount: Int!
   tasks: [Task!]!
   eventsCount: Int!
   events: [Event!]!
-  requestsCount: Int!
-  requests: [Request!]!
+  notes: [Note!]!
+  notesCount: Int!
+  joinRequestsCount: Int!
+  joinRequests: [JoinRequest!]!
 }
 
 type LoftAndFirstMember {
@@ -3843,7 +4382,7 @@ input NewLoftNewMember {
 type Mutation {
   createTask(input: NewTask!): Task!
   createEvent(input: NewEvent!): Event!
-  createRequest(input: NewRequest!): Request!
+  createRequest(input: NewRequest!): JoinRequest!
   createLoft(input: NewLoft!): Loft!  # TODO: probably different for production
   createLoftAndMember(input: NewLoftNewMember): LoftAndFirstMember!
 }`},

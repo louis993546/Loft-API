@@ -16,8 +16,15 @@ type Echo struct {
 }
 
 type Event struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID      string `json:"id"`
+	Title   string `json:"title"`
+	Creator Member `json:"creator"`
+}
+
+type JoinRequest struct {
+	ID      string `json:"id"`
+	Name    string `json:"name"`
+	Message string `json:"message"`
 }
 
 type LoftAndFirstMember struct {
@@ -26,8 +33,9 @@ type LoftAndFirstMember struct {
 }
 
 type Member struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID         string  `json:"id"`
+	Name       string  `json:"name"`
+	ApprovedBy *Member `json:"approvedBy"`
 }
 
 type NewEvent struct {
@@ -55,16 +63,54 @@ type NewTask struct {
 	LoftID string `json:"loftId"`
 }
 
-type Request struct {
-	ID      string `json:"id"`
-	Name    string `json:"name"`
-	Message string `json:"message"`
+type Note struct {
+	ID      string     `json:"id"`
+	Creator Member     `json:"creator"`
+	Format  NoteFormat `json:"format"`
+	Content string     `json:"content"`
 }
 
 type Task struct {
-	ID    string    `json:"id"`
-	Title string    `json:"title"`
-	State TaskState `json:"state"`
+	ID       string    `json:"id"`
+	Title    string    `json:"title"`
+	State    TaskState `json:"state"`
+	Creator  Member    `json:"creator"`
+	Assignee *Member   `json:"Assignee"`
+}
+
+type NoteFormat string
+
+const (
+	NoteFormatCommonMark NoteFormat = "COMMON_MARK"
+)
+
+func (e NoteFormat) IsValid() bool {
+	switch e {
+	case NoteFormatCommonMark:
+		return true
+	}
+	return false
+}
+
+func (e NoteFormat) String() string {
+	return string(e)
+}
+
+func (e *NoteFormat) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = NoteFormat(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid NoteFormat", str)
+	}
+	return nil
+}
+
+func (e NoteFormat) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 type TaskState string
