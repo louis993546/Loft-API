@@ -113,19 +113,34 @@ func (r *loftResolver) ID(ctx context.Context, obj *models.Loft) (string, error)
 	return obj.ID.String(), nil
 }
 func (r *loftResolver) MembersCount(ctx context.Context, obj *models.Loft) (int, error) {
-	panic("not implemented")
+	row := r.memberCountStmt.QueryRow(obj.ID)
+	var count int
+	if scanErr := row.Scan(&count); scanErr != nil {
+		return -1, scanErr
+	}
+	return count, nil
 }
 func (r *loftResolver) Members(ctx context.Context, obj *models.Loft) ([]Member, error) {
 	panic("not implemented")
 }
 func (r *loftResolver) TasksCount(ctx context.Context, obj *models.Loft) (int, error) {
-	panic("not implemented")
+	row := r.taskCountStmt.QueryRow(obj.ID)
+	var count int
+	if scanErr := row.Scan(&count); scanErr != nil {
+		return -1, scanErr
+	}
+	return count, nil
 }
 func (r *loftResolver) Tasks(ctx context.Context, obj *models.Loft) ([]Task, error) {
 	panic("not implemented")
 }
 func (r *loftResolver) EventsCount(ctx context.Context, obj *models.Loft) (int, error) {
-	panic("not implemented")
+	row := r.eventCountStmt.QueryRow(obj.ID)
+	var count int
+	if scanErr := row.Scan(&count); scanErr != nil {
+		return -1, scanErr
+	}
+	return count, nil
 }
 func (r *loftResolver) Events(ctx context.Context, obj *models.Loft) ([]Event, error) {
 	panic("not implemented")
@@ -134,13 +149,23 @@ func (r *loftResolver) Notes(ctx context.Context, obj *models.Loft) ([]Note, err
 	panic("not implemented")
 }
 func (r *loftResolver) NotesCount(ctx context.Context, obj *models.Loft) (int, error) {
-	panic("not implemented")
+	row := r.noteCountStml.QueryRow(obj.ID)
+	var count int
+	if scanErr := row.Scan(&count); scanErr != nil {
+		return -1, scanErr
+	}
+	return count, nil
 }
 func (r *loftResolver) JoinRequestsCount(ctx context.Context, obj *models.Loft) (int, error) {
 	panic("not implemented")
 }
 func (r *loftResolver) JoinRequests(ctx context.Context, obj *models.Loft) ([]JoinRequest, error) {
-	panic("not implemented")
+	row := r.joinRequestCountStmt.QueryRow(obj.ID)
+	var count int
+	if scanErr := row.Scan(&count); scanErr != nil {
+		return -1, scanErr
+	}
+	return count, nil
 }
 
 type mutationResolver struct{ *Resolver }
