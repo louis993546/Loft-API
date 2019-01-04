@@ -24,14 +24,32 @@ type Resolver struct {
 }
 
 // NewResolver is essentially the constructor for Resolver. It reminds user that they should give Resolver a db to access
-// TODO: handle all those errors: panic with the message
+// TODO: unless it's COUNT don't use *
 func NewResolver(db *sql.DB) *Resolver {
-	memberCountStmt, _ := db.Prepare("SELECT COUNT(*) FROM loft.member WHERE loft.member.loft_id=?;")
-	membersStmt, _ := db.Prepare("SELECT * FROM loft.member WHERE loft.member.loft_id=?;")
-	taskCountStmt, _ := db.Prepare("SELECT COUNT(*) FROM loft.task WHERE loft.task.loft_id=?;")
-	tasksStmt, _ := db.Prepare("SELECT * FROM loft.task WHERE loft.task.loft_id=?;")
-	eventCountStmt, _ := db.Prepare("SELECT COUNT(*) FROM loft.event WHERE loft.event.loft_id=?;")
-	eventsStmt, _ := db.Prepare("SELECT * FROM loft.event WHERE loft.event.loft_id=?;")
+	memberCountStmt, mcErr := db.Prepare("SELECT COUNT(*) FROM loft.member WHERE loft.member.loft_id=?;")
+	if mcErr != nil {
+		log.Panicf("Invalid query for member count: %e\n", mcErr)
+	}
+	membersStmt, mErr := db.Prepare("SELECT * FROM loft.member WHERE loft.member.loft_id=?;")
+	if mErr != nil {
+		log.Panicf("Invalid query for members: %e\n", mErr)
+	}
+	taskCountStmt, tcErr := db.Prepare("SELECT COUNT(*) FROM loft.task WHERE loft.task.loft_id=?;")
+	if tcErr != nil {
+		log.Panicf("Invalid query for task count: %e\n", tcErr)
+	}
+	tasksStmt, tErr := db.Prepare("SELECT * FROM loft.task WHERE loft.task.loft_id=?;")
+	if tErr != nil {
+		log.Panicf("Invalid query for tasks: %e\n", tErr)
+	}
+	eventCountStmt, ecErr := db.Prepare("SELECT COUNT(*) FROM loft.event WHERE loft.event.loft_id=?;")
+	if ecErr != nil {
+		log.Panicf("Invalid query for event count: %e\n", ecErr)
+	}
+	eventsStmt, eErr := db.Prepare("SELECT * FROM loft.event WHERE loft.event.loft_id=?;")
+	if eErr != nil {
+		log.Panicf("Invalid query for events: %e\n", eErr)
+	}
 	return &Resolver{
 		dbAreYouSureAboutThis: db,
 		memberCountStmt:       memberCountStmt,
