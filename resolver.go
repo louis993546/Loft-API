@@ -12,14 +12,34 @@ import (
 )
 
 // Resolver is the entry point to how the query tree got processed
+// dbAreYouSureAboutThis is pretty much temporary only. They should be prepared on server start-up (fail-fast)
 type Resolver struct {
-	db *sql.DB
+	dbAreYouSureAboutThis *sql.DB
+	memberCountStmt       *sql.Stmt
+	membersStmt           *sql.Stmt
+	taskCountStmt         *sql.Stmt
+	tasksStmt             *sql.Stmt
+	eventCountStmt        *sql.Stmt
+	eventsStmt            *sql.Stmt
 }
 
 // NewResolver is essentially the constructor for Resolver. It reminds user that they should give Resolver a db to access
+// TODO: handle all those errors: panic with the message
 func NewResolver(db *sql.DB) *Resolver {
+	memberCountStmt, _ := db.Prepare("SELECT COUNT(*) FROM loft.member WHERE loft.member.loft_id=?;")
+	membersStmt, _ := db.Prepare("SELECT * FROM loft.member WHERE loft.member.loft_id=?;")
+	taskCountStmt, _ := db.Prepare("SELECT COUNT(*) FROM loft.task WHERE loft.task.loft_id=?;")
+	tasksStmt, _ := db.Prepare("SELECT * FROM loft.task WHERE loft.task.loft_id=?;")
+	eventCountStmt, _ := db.Prepare("SELECT COUNT(*) FROM loft.event WHERE loft.event.loft_id=?;")
+	eventsStmt, _ := db.Prepare("SELECT * FROM loft.event WHERE loft.event.loft_id=?;")
 	return &Resolver{
-		db: db,
+		dbAreYouSureAboutThis: db,
+		memberCountStmt:       memberCountStmt,
+		membersStmt:           membersStmt,
+		taskCountStmt:         taskCountStmt,
+		tasksStmt:             tasksStmt,
+		eventCountStmt:        eventCountStmt,
+		eventsStmt:            eventsStmt,
 	}
 }
 
@@ -45,33 +65,21 @@ func (r *loftResolver) ID(ctx context.Context, obj *models.Loft) (string, error)
 	return obj.ID.String(), nil
 }
 func (r *loftResolver) MembersCount(ctx context.Context, obj *models.Loft) (int, error) {
-	query := fmt.Sprintf("SELECT COUNT(*) FROM loft.member WHERE loft.member.loft_id=%s;", obj.ID.String())
-	log.Println(query)
 	panic("not implemented")
 }
 func (r *loftResolver) Members(ctx context.Context, obj *models.Loft) ([]Member, error) {
-	query := fmt.Sprintf("SELECT * FROM loft.member WHERE loft.member.loft_id=%s;", obj.ID.String())
-	log.Println(query)
 	panic("not implemented")
 }
 func (r *loftResolver) TasksCount(ctx context.Context, obj *models.Loft) (int, error) {
-	query := fmt.Sprintf("SELECT COUNT(*) FROM loft.task WHERE loft.task.loft_id=%s;", obj.ID.String())
-	log.Println(query)
 	panic("not implemented")
 }
 func (r *loftResolver) Tasks(ctx context.Context, obj *models.Loft) ([]Task, error) {
-	query := fmt.Sprintf("SELECT * FROM loft.task WHERE loft.task.loft_id=%s;", obj.ID.String())
-	log.Println(query)
 	panic("not implemented")
 }
 func (r *loftResolver) EventsCount(ctx context.Context, obj *models.Loft) (int, error) {
-	query := fmt.Sprintf("SELECT COUNT(*) FROM loft.event WHERE loft.event.loft_id=%s;", obj.ID.String())
-	log.Println(query)
 	panic("not implemented")
 }
 func (r *loftResolver) Events(ctx context.Context, obj *models.Loft) ([]Event, error) {
-	query := fmt.Sprintf("SELECT * FROM loft.event WHERE loft.event.loft_id=%s;", obj.ID.String())
-	log.Println(query)
 	panic("not implemented")
 }
 func (r *loftResolver) RequestsCount(ctx context.Context, obj *models.Loft) (int, error) {
@@ -107,7 +115,7 @@ type queryResolver struct{ *Resolver }
 
 func (r *queryResolver) Lofts(ctx context.Context) ([]models.Loft, error) {
 	query := "SELECT loft.loft.id, loft.loft.\"name\", loft.loft.join_code, loft.loft.created_at FROM loft.loft;"
-	rows, queryErr := r.db.Query(query)
+	rows, queryErr := r.dbAreYouSureAboutThis.Query(query)
 	if queryErr != nil {
 		panic("not implemented: find out what can happen, and what is recoverable and how")
 	}
