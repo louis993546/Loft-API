@@ -3,6 +3,8 @@
 type Member {
   id: ID!
   name: String!
+  # approvedAt:
+  approvedBy: Member
 }
 
 enum TaskState {
@@ -14,30 +16,55 @@ type Task {
   id: ID!
   title: String!
   state: TaskState!
+  # createdAt
+  creator: Member!
+  Assignee: Member
+  # dueAt
 }
 
 type Event {
   id: ID!
-  name: String!
+  title: String!
+  creator: Member!
+  # createdAt
+  # startTime
+  # endTime
+}
+
+enum NoteFormat {
+  COMMON_MARK
+}
+
+type Note {
+  id: ID!
+  creator: Member!,
+  # createdAt: 
+  format: NoteFormat!,
+  content: String!
 }
 
 type Request {
   id: ID!
   name: String!
   message: String!
+  # createdAt:
 }
 
 type Loft {
   id: ID!
   name: String!
+  joinCode: String!
+  # createdAt:
   membersCount: Int!
   members: [Member!]!
   tasksCount: Int!
   tasks: [Task!]!
   eventsCount: Int!
   events: [Event!]!
-  requestsCount: Int!
-  requests: [Request!]!
+  notes: [Note!]!
+  notesCount: Int!
+  joinRequestsCount: Int!
+  joinRequests: [JoinRequest!]!
 }
 
 type LoftAndFirstMember {

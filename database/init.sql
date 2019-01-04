@@ -31,8 +31,6 @@ CREATE TABLE IF NOT EXISTS loft.member(
     approved_at timestamptz,
     approved_by_member_id uuid,
     name text not null,
-    phone text,
-    email text,
     join_request_id uuid,
     FOREIGN KEY (approved_by_member_id) REFERENCES loft.member(id)
 );
@@ -62,6 +60,7 @@ CREATE TABLE IF NOT EXISTS loft.task(
     created_at timestamptz not null DEFAULT NOW(),
     assignee_id uuid REFERENCES loft.member(id),
     title text not null,
+    -- TODO: missing state flag (done, not done, etc)
     due_date date
 );
 
@@ -92,10 +91,10 @@ CREATE TABLE IF NOT EXISTS loft.message(
     type uuid not null REFERENCES loft.message_type
 );
 
-CREATE TABLE IF NOT EXISTS loft.session(
-    id uuid PRIMARY KEY default uuid_generate_v4(),
-    member_id uuid REFERENCES loft.member(id),
-    created_at timestamptz DEFAULT NOW(),
-    last_used_at timestamptz,
-    last_used_ip cidr
-);
+-- CREATE TABLE IF NOT EXISTS loft.session(
+--     id uuid PRIMARY KEY default uuid_generate_v4(),
+--     member_id uuid REFERENCES loft.member(id),
+--     created_at timestamptz DEFAULT NOW(),
+--     last_used_at timestamptz,
+--     last_used_ip cidr
+-- );
