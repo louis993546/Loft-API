@@ -10,7 +10,7 @@ import (
 	"github.com/louistsaitszho/loft/models"
 )
 
-// Resolver is the entry point to how the query tree got processed
+// Resolver is the entry point to how the query tree got processed. It has all the prepared statements that the api would need.
 // dbAreYouSureAboutThis is temporary only. All queries should be prepared on server start-up (fail-fast)
 type Resolver struct {
 	dbAreYouSureAboutThis *sql.DB
