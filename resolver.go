@@ -28,13 +28,12 @@ type Resolver struct {
 }
 
 // NewResolver is essentially the constructor for Resolver. It reminds user that they should give Resolver a db to access
-// TODO: unless it's COUNT don't use *
 func NewResolver(db *sql.DB) *Resolver {
 	memberCountStmt, mcErr := db.Prepare("SELECT COUNT(*) FROM loft.member WHERE loft.member.loft_id = $1;")
 	if mcErr != nil {
 		log.Panicf("Invalid query for member count: '%v'\n", mcErr)
 	}
-	membersStmt, mErr := db.Prepare("SELECT * FROM loft.member WHERE loft.member.loft_id = $1;")
+	membersStmt, mErr := db.Prepare("SELECT m.id, m.name, m.approved_at, m.approved_by_member_id, m.join_request_id FROM loft.member WHERE m.loft_id = $1;")
 	if mErr != nil {
 		log.Panicf("Invalid query for members: '%v'\n", mErr)
 	}
@@ -42,7 +41,7 @@ func NewResolver(db *sql.DB) *Resolver {
 	if tcErr != nil {
 		log.Panicf("Invalid query for task count: '%v'\n", tcErr)
 	}
-	tasksStmt, tErr := db.Prepare("SELECT * FROM loft.task WHERE loft.task.loft_id = $1;")
+	tasksStmt, tErr := db.Prepare("SELECT t.id, t.creator_id, t.created_at, t.assignee_id, t.title, t.due_date FROM loft.task WHERE t.loft_id = $1;")
 	if tErr != nil {
 		log.Panicf("Invalid query for tasks: '%v'\n", tErr)
 	}
@@ -50,7 +49,7 @@ func NewResolver(db *sql.DB) *Resolver {
 	if ecErr != nil {
 		log.Panicf("Invalid query for event count: '%v'\n", ecErr)
 	}
-	eventsStmt, eErr := db.Prepare("SELECT * FROM loft.event WHERE loft.event.loft_id = $1;")
+	eventsStmt, eErr := db.Prepare("SELECT e.id, e.creator_id, e.created_at, e.start_time, e.end_time, e.title FROM loft.event AS e WHERE e.loft_id = $1;")
 	if eErr != nil {
 		log.Panicf("Invalid query for events: '%v'\n", eErr)
 	}
@@ -58,11 +57,12 @@ func NewResolver(db *sql.DB) *Resolver {
 	if ncErr != nil {
 		log.Panicf("Invalid query for note count: '%v'\n", ncErr)
 	}
-	notesStmt, nErr := db.Prepare("SELECT * FROM loft.note WHERE loft.note.loft_id = $1;")
+	//TODO: this should JOIN with SELECT * FROM loft.note_format to get directly the format name
+	notesStmt, nErr := db.Prepare("SELECT n.id, n.creator_id, n.created_at, n.format, n.content FROM loft.note AS n WHERE n.loft_id = $1;")
 	if nErr != nil {
 		log.Panicf("Invalid query for note: '%v'\n", nErr)
 	}
-	loftStmt, lErr := db.Prepare("SELECT * FROM loft.loft WHERE loft.loft.id = $1;")
+	loftStmt, lErr := db.Prepare("SELECT l.id, l.name, l.join_code, l.created_at FROM loft.loft AS l WHERE l.id = $1;")
 	if lErr != nil {
 		log.Panicf("Invalid query for loft: '%v'\n", lErr)
 	}
@@ -70,7 +70,7 @@ func NewResolver(db *sql.DB) *Resolver {
 	if jrcErr != nil {
 		log.Panicf("Invalid query for join request count: '%v'\n", jrcErr)
 	}
-	joinRequestStmt, jrErr := db.Prepare("SELECT * FROM loft.join_request WHERE loft.join_request.loft_id = $1;")
+	joinRequestStmt, jrErr := db.Prepare("SELECT jr.id, jr.name, jr.message, jr.created_at FROM loft.join_request AS jr WHERE jr.loft_id = $1;")
 	if jrErr != nil {
 		log.Panicf("Invalid query for join requests: '%v'\n", jrErr)
 	}
