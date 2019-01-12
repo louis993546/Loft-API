@@ -121,7 +121,32 @@ func (r *loftResolver) MembersCount(ctx context.Context, obj *models.Loft) (int,
 	return count, nil
 }
 func (r *loftResolver) Members(ctx context.Context, obj *models.Loft) ([]Member, error) {
-	panic("not implemented")
+	rows, queryError := r.membersStmt.Query(obj.ID)
+	if queryError != nil {
+		panic("not implemented: maybe 404, maybe 5XX, etc")
+	}
+	defer rows.Close()
+
+	var members []Member
+	for rows.Next() {
+		var (
+			id                 uuid.UUID
+			name               string
+			approvedAt         string
+			approvedByMemberID uuid.UUID
+			joinRequestID      uuid.UUID
+		)
+
+		if scanErr := rows.Scan(&id, &name, &approvedAt, &approvedByMemberID, &joinRequestID); scanErr != nil {
+			panic("not implemented")
+		}
+		members = append(members, Member{
+			ID:         id.String(), //TODO: fix me, need to teach graphql ID = UUID
+			Name:       name,
+			ApprovedBy: nil, //TODO: need another resolver
+		})
+	}
+	return members, nil
 }
 func (r *loftResolver) TasksCount(ctx context.Context, obj *models.Loft) (int, error) {
 	row := r.taskCountStmt.QueryRow(obj.ID)
