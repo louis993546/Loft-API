@@ -108,10 +108,6 @@ func (r *Resolver) Query() QueryResolver {
 
 type loftResolver struct{ *Resolver }
 
-func (r *loftResolver) ID(ctx context.Context, obj *models.Loft) (string, error) {
-	//TODO: replace it with external marshaler (https://gqlgen.com/reference/scalars/)
-	return obj.ID.String(), nil
-}
 func (r *loftResolver) MembersCount(ctx context.Context, obj *models.Loft) (int, error) {
 	row := r.memberCountStmt.QueryRow(obj.ID)
 	var count int
@@ -141,7 +137,7 @@ func (r *loftResolver) Members(ctx context.Context, obj *models.Loft) ([]Member,
 			panic("not implemented")
 		}
 		members = append(members, Member{
-			ID:         id.String(), //TODO: fix me, need to teach graphql ID = UUID
+			ID:         id,
 			Name:       name,
 			ApprovedBy: nil, //TODO: need another resolver
 		})
@@ -242,7 +238,7 @@ func (r *queryResolver) Lofts(ctx context.Context) ([]models.Loft, error) {
 
 	return lofts, nil
 }
-func (r *queryResolver) Loft(ctx context.Context, id string) (*models.Loft, error) {
+func (r *queryResolver) Loft(ctx context.Context, id uuid.UUID) (*models.Loft, error) {
 	panic("not implemented")
 }
 func (r *queryResolver) Echo(ctx context.Context) (Echo, error) {

@@ -11,7 +11,9 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
+	"github.com/gofrs/uuid"
 	"github.com/louistsaitszho/loft/models"
+	"github.com/louistsaitszho/loft/scalars"
 	"github.com/vektah/gqlparser"
 	"github.com/vektah/gqlparser/ast"
 )
@@ -102,7 +104,7 @@ type ComplexityRoot struct {
 
 	Query struct {
 		Lofts func(childComplexity int) int
-		Loft  func(childComplexity int, id string) int
+		Loft  func(childComplexity int, id uuid.UUID) int
 		Echo  func(childComplexity int) int
 	}
 
@@ -116,8 +118,6 @@ type ComplexityRoot struct {
 }
 
 type LoftResolver interface {
-	ID(ctx context.Context, obj *models.Loft) (string, error)
-
 	MembersCount(ctx context.Context, obj *models.Loft) (int, error)
 	Members(ctx context.Context, obj *models.Loft) ([]Member, error)
 	TasksCount(ctx context.Context, obj *models.Loft) (int, error)
@@ -138,7 +138,7 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	Lofts(ctx context.Context) ([]models.Loft, error)
-	Loft(ctx context.Context, id string) (*models.Loft, error)
+	Loft(ctx context.Context, id uuid.UUID) (*models.Loft, error)
 	Echo(ctx context.Context) (Echo, error)
 }
 
@@ -224,10 +224,10 @@ func field_Mutation_createLoftAndMember_args(rawArgs map[string]interface{}) (ma
 
 func field_Query_loft_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var arg0 string
+	var arg0 uuid.UUID
 	if tmp, ok := rawArgs["id"]; ok {
 		var err error
-		arg0, err = graphql.UnmarshalID(tmp)
+		arg0, err = scalars.UnmarshalUUIDScalar(tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -582,7 +582,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Loft(childComplexity, args["id"].(string)), true
+		return e.complexity.Query.Loft(childComplexity, args["id"].(uuid.UUID)), true
 
 	case "Query.echo":
 		if e.complexity.Query.Echo == nil {
@@ -822,10 +822,10 @@ func (ec *executionContext) _Event_id(ctx context.Context, field graphql.Collect
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(uuid.UUID)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalID(res)
+	return scalars.MarshalUUIDScalar(res)
 }
 
 // nolint: vetshadow
@@ -944,10 +944,10 @@ func (ec *executionContext) _JoinRequest_id(ctx context.Context, field graphql.C
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(uuid.UUID)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalID(res)
+	return scalars.MarshalUUIDScalar(res)
 }
 
 // nolint: vetshadow
@@ -1020,14 +1020,10 @@ func (ec *executionContext) _Loft(ctx context.Context, sel ast.SelectionSet, obj
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Loft")
 		case "id":
-			wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				out.Values[i] = ec._Loft_id(ctx, field, obj)
-				if out.Values[i] == graphql.Null {
-					invalid = true
-				}
-				wg.Done()
-			}(i, field)
+			out.Values[i] = ec._Loft_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "name":
 			out.Values[i] = ec._Loft_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -1152,7 +1148,7 @@ func (ec *executionContext) _Loft_id(ctx context.Context, field graphql.Collecte
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Loft().ID(rctx, obj)
+		return obj.ID, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -1160,10 +1156,10 @@ func (ec *executionContext) _Loft_id(ctx context.Context, field graphql.Collecte
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(uuid.UUID)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalID(res)
+	return scalars.MarshalUUIDScalar(res)
 }
 
 // nolint: vetshadow
@@ -1804,10 +1800,10 @@ func (ec *executionContext) _Member_id(ctx context.Context, field graphql.Collec
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(uuid.UUID)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalID(res)
+	return scalars.MarshalUUIDScalar(res)
 }
 
 // nolint: vetshadow
@@ -2156,10 +2152,10 @@ func (ec *executionContext) _Note_id(ctx context.Context, field graphql.Collecte
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(uuid.UUID)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalID(res)
+	return scalars.MarshalUUIDScalar(res)
 }
 
 // nolint: vetshadow
@@ -2381,7 +2377,7 @@ func (ec *executionContext) _Query_loft(ctx context.Context, field graphql.Colle
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Loft(rctx, args["id"].(string))
+		return ec.resolvers.Query().Loft(rctx, args["id"].(uuid.UUID))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -2557,10 +2553,10 @@ func (ec *executionContext) _Task_id(ctx context.Context, field graphql.Collecte
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(uuid.UUID)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalID(res)
+	return scalars.MarshalUUIDScalar(res)
 }
 
 // nolint: vetshadow
@@ -4133,7 +4129,7 @@ func UnmarshalNewEvent(v interface{}) (NewEvent, error) {
 			}
 		case "loftId":
 			var err error
-			it.LoftID, err = graphql.UnmarshalID(v)
+			it.LoftID, err = scalars.UnmarshalUUIDScalar(v)
 			if err != nil {
 				return it, err
 			}
@@ -4205,7 +4201,7 @@ func UnmarshalNewRequest(v interface{}) (NewRequest, error) {
 			}
 		case "loftId":
 			var err error
-			it.LoftID, err = graphql.UnmarshalID(v)
+			it.LoftID, err = scalars.UnmarshalUUIDScalar(v)
 			if err != nil {
 				return it, err
 			}
@@ -4229,7 +4225,7 @@ func UnmarshalNewTask(v interface{}) (NewTask, error) {
 			}
 		case "loftId":
 			var err error
-			it.LoftID, err = graphql.UnmarshalID(v)
+			it.LoftID, err = scalars.UnmarshalUUIDScalar(v)
 			if err != nil {
 				return it, err
 			}
@@ -4270,9 +4266,10 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 
 var parsedSchema = gqlparser.MustLoadSchema(
 	&ast.Source{Name: "schema.graphql", Input: `# scalar Date   #TODO: find out how it will be (de)serialize
+scalar UUID
 
 type Member {
-  id: ID!
+  id: UUID!
   name: String!
   # approvedAt:
   approvedBy: Member
@@ -4284,7 +4281,7 @@ enum TaskState {
 }
 
 type Task {
-  id: ID!
+  id: UUID!
   title: String!
   state: TaskState!
   # createdAt
@@ -4294,7 +4291,7 @@ type Task {
 }
 
 type Event {
-  id: ID!
+  id: UUID!
   title: String!
   creator: Member!
   # createdAt
@@ -4307,7 +4304,7 @@ enum NoteFormat {
 }
 
 type Note {
-  id: ID!
+  id: UUID!
   creator: Member!,
   # createdAt: 
   format: NoteFormat!,
@@ -4315,14 +4312,14 @@ type Note {
 }
 
 type JoinRequest {
-  id: ID!
+  id: UUID!
   name: String!
   message: String!
   # createdAt:
 }
 
 type Loft {
-  id: ID!
+  id: UUID!
   name: String!
   joinCode: String!
   # createdAt:
@@ -4350,24 +4347,24 @@ type Echo {
 
 type Query {
   lofts: [Loft!]!   # for testing only, should not exist in production version
-  loft(id: ID!): Loft
+  loft(id: UUID!): Loft
   echo: Echo!
 }
 
 input NewTask {
   title: String!
-  loftId: ID!
+  loftId: UUID!
 }
 
 input NewEvent {
   name: String!
-  loftId: ID!
+  loftId: UUID!
 }
 
 input NewRequest {
   name: String!
   message: String!
-  loftId: ID!
+  loftId: UUID!
 }
 
 input NewLoft {

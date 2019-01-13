@@ -1,7 +1,8 @@
 # scalar Date   #TODO: find out how it will be (de)serialize
+scalar UUID
 
 type Member {
-  id: ID!
+  id: UUID!
   name: String!
   # approvedAt:
   approvedBy: Member
@@ -13,7 +14,7 @@ enum TaskState {
 }
 
 type Task {
-  id: ID!
+  id: UUID!
   title: String!
   state: TaskState!
   # createdAt
@@ -23,7 +24,7 @@ type Task {
 }
 
 type Event {
-  id: ID!
+  id: UUID!
   title: String!
   creator: Member!
   # createdAt
@@ -36,7 +37,7 @@ enum NoteFormat {
 }
 
 type Note {
-  id: ID!
+  id: UUID!
   creator: Member!,
   # createdAt: 
   format: NoteFormat!,
@@ -44,14 +45,14 @@ type Note {
 }
 
 type JoinRequest {
-  id: ID!
+  id: UUID!
   name: String!
   message: String!
   # createdAt:
 }
 
 type Loft {
-  id: ID!
+  id: UUID!
   name: String!
   joinCode: String!
   # createdAt:
@@ -79,24 +80,24 @@ type Echo {
 
 type Query {
   lofts: [Loft!]!   # for testing only, should not exist in production version
-  loft(id: ID!): Loft
+  loft(id: UUID!): Loft
   echo: Echo!
 }
 
 input NewTask {
   title: String!
-  loftId: ID!
+  loftId: UUID!
 }
 
 input NewEvent {
   name: String!
-  loftId: ID!
+  loftId: UUID!
 }
 
 input NewRequest {
   name: String!
   message: String!
-  loftId: ID!
+  loftId: UUID!
 }
 
 input NewLoft {

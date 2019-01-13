@@ -10,3 +10,5 @@ resolver:
 models:
   Loft:
     model: github.com/louistsaitszho/loft/models.Loft
+  UUID:
+    model: github.com/louistsaitszho/loft/scalars.UUIDScalar
