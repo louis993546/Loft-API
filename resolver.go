@@ -161,31 +161,34 @@ func (r *loftResolver) TasksCount(ctx context.Context, obj *models.Loft) (int, e
 	return count, nil
 }
 func (r *loftResolver) Tasks(ctx context.Context, obj *models.Loft) ([]models.Task, error) {
-	panic("not implemented")
-	// rows, queryError := r.tasksStmt.Query(obj.ID)
-	// if queryError != nil {
-	// 	panic("not implemented")
-	// }
-	// defer rows.Close()
+	rows, queryError := r.tasksStmt.Query(obj.ID)
+	if queryError != nil {
+		panic("not implemented")
+	}
+	defer rows.Close()
 
-	// var tasks []Task
-	// for rows.Next() {
-	// 	var ()
+	var tasks []models.Task
+	for rows.Next() {
+		var (
+			id        uuid.UUID
+			title     string
+			taskState models.TaskState
+			createdAt time.Time
+			dueAt     *time.Time
+		)
 
-	// 	if scanErr := rows.Scan(); scanErr != nil {
-	// 		panic("not implemented")
-	// 	}
-	// 	tasks = append(tasks, Task{
-	// 		ID:        nil,
-	// 		Title:     nil,
-	// 		State:     nil,
-	// 		CreatedAt: nil,
-	// 		Creator:   nil,
-	// 		Assignee:  nil,
-	// 		DueAt:     nil,
-	// 	})
-	// }
-	// return tasks, nil
+		if scanErr := rows.Scan(&id, &title, &taskState, &createdAt, dueAt); scanErr != nil {
+			panic("not implemented")
+		}
+		tasks = append(tasks, models.Task{
+			ID:        id,
+			Title:     title,
+			State:     taskState,
+			CreatedAt: createdAt,
+			DueAt:     dueAt,
+		})
+	}
+	return tasks, nil
 }
 func (r *loftResolver) EventsCount(ctx context.Context, obj *models.Loft) (int, error) {
 	row := r.eventCountStmt.QueryRow(obj.ID)
