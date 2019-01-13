@@ -16,6 +16,8 @@ models:
     model: github.com/louistsaitszho/loft/models.Task
   TaskState:
     model: github.com/louistsaitszho/loft/models.TaskState
+  Event:
+    model: github.com/louistsaitszho/loft/models.Event
   UUID:
     model: github.com/louistsaitszho/loft/scalars.UUIDScalar
   Timestamp:

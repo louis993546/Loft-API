@@ -73,3 +73,12 @@ type Task struct {
 	CreatedAt time.Time  `json:"createdAt"`
 	DueAt     *time.Time `json:"dueAt"`
 }
+
+// Event removes the big Member struct, so that gqlgen can use resolver to fetch it only when necessary
+type Event struct {
+	ID        uuid.UUID  `json:"id"`
+	Title     string     `json:"title"`
+	CreatedAt time.Time  `json:"createdAt"`
+	StartTime *time.Time `json:"startTime"`
+	EndTime   *time.Time `json:"endTime"`
+}
