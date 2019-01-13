@@ -200,6 +200,30 @@ func (r *loftResolver) EventsCount(ctx context.Context, obj *models.Loft) (int, 
 }
 func (r *loftResolver) Events(ctx context.Context, obj *models.Loft) ([]Event, error) {
 	panic("not implemented")
+	// rows, queryError := r.eventsStmt.Query(obj.ID)
+	// if queryError != nil {
+	// 	panic("not implemented")
+	// }
+	// defer rows.Close()
+
+	// var events []Event
+	// for rows.Next() {
+	// 	var (
+
+	// 	)
+
+	// 	if scanErr := rows.Scan(); scanErr != nil {
+	// 		panic("not implemented")
+	// 	}
+	// 	events = append(events, Event{
+	// 		ID: nil,
+	// 		Title: nil,
+	// 		CreatedAt: nil,
+	// 		StartTime: nil,
+	// 		EndTime: nil,
+	// 	})
+	// }
+	// return events, nil
 }
 func (r *loftResolver) Notes(ctx context.Context, obj *models.Loft) ([]Note, error) {
 	panic("not implemented")
