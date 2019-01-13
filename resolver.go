@@ -33,7 +33,7 @@ func NewResolver(db *sql.DB) *Resolver {
 	if mcErr != nil {
 		log.Panicf("Invalid query for member count: '%v'\n", mcErr)
 	}
-	membersStmt, mErr := db.Prepare("SELECT m.id, m.name, m.approved_at, m.approved_by_member_id, m.join_request_id FROM loft.member WHERE m.loft_id = $1;")
+	membersStmt, mErr := db.Prepare("SELECT m.id, m.name, m.approved_at, m.approved_by_member_id, m.join_request_id FROM loft.member AS m WHERE m.loft_id = $1;")
 	if mErr != nil {
 		log.Panicf("Invalid query for members: '%v'\n", mErr)
 	}
