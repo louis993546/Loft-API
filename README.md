@@ -25,11 +25,11 @@ Once the git process has been setup correctly, publishing image will be automate
 
 ### Docker
 
-| Action             | bash command                                                                                   |
-|--------------------|------------------------------------------------------------------------------------------------|
-| Build docker image | `docker build --rm -t api-loft:latest .`                                                       |
-| Run bash in image  | `docker run -it api-loft:latest bash`                                                          |
-| Run `CMD` in image | `docker run -it --rm -p 8080:8080 api-loft:latest` (TODO: probably missing a couple variables) |
+| Action             | bash command                                                                                    |
+|--------------------|-------------------------------------------------------------------------------------------------|
+| Build docker image | `docker build --rm -t api-loft:latest .`                                                        |
+| Run bash in image  | `docker run -it api-loft:latest bash`                                                           |
+| Run `CMD` in image | `docker run -e "DATABASE_URL=postgres://${database url}" -it --rm -p 8080:8080 api-loft:latest` |
 
 ### Heroku
 
