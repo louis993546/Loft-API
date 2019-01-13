@@ -157,6 +157,30 @@ func (r *loftResolver) TasksCount(ctx context.Context, obj *models.Loft) (int, e
 }
 func (r *loftResolver) Tasks(ctx context.Context, obj *models.Loft) ([]Task, error) {
 	panic("not implemented")
+	// rows, queryError := r.tasksStmt.Query(obj.ID)
+	// if queryError != nil {
+	// 	panic("not implemented")
+	// }
+	// defer rows.Close()
+
+	// var tasks []Task
+	// for rows.Next() {
+	// 	var ()
+
+	// 	if scanErr := rows.Scan(); scanErr != nil {
+	// 		panic("not implemented")
+	// 	}
+	// 	tasks = append(tasks, Task{
+	// 		ID:        nil,
+	// 		Title:     nil,
+	// 		State:     nil,
+	// 		CreatedAt: nil,
+	// 		Creator:   nil,
+	// 		Assignee:  nil,
+	// 		DueAt:     nil,
+	// 	})
+	// }
+	// return tasks, nil
 }
 func (r *loftResolver) EventsCount(ctx context.Context, obj *models.Loft) (int, error) {
 	row := r.eventCountStmt.QueryRow(obj.ID)
