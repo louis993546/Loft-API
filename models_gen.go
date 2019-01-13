@@ -71,16 +71,6 @@ type Note struct {
 	Content   string        `json:"content"`
 }
 
-type Task struct {
-	ID        uuid.UUID      `json:"id"`
-	Title     string         `json:"title"`
-	State     TaskState      `json:"state"`
-	CreatedAt time.Time      `json:"createdAt"`
-	Creator   models.Member  `json:"creator"`
-	Assignee  *models.Member `json:"Assignee"`
-	DueAt     *time.Time     `json:"dueAt"`
-}
-
 type NoteFormat string
 
 const (
@@ -113,41 +103,5 @@ func (e *NoteFormat) UnmarshalGQL(v interface{}) error {
 }
 
 func (e NoteFormat) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-type TaskState string
-
-const (
-	TaskStateNotDone TaskState = "NOT_DONE"
-	TaskStateDone    TaskState = "DONE"
-)
-
-func (e TaskState) IsValid() bool {
-	switch e {
-	case TaskStateNotDone, TaskStateDone:
-		return true
-	}
-	return false
-}
-
-func (e TaskState) String() string {
-	return string(e)
-}
-
-func (e *TaskState) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = TaskState(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid TaskState", str)
-	}
-	return nil
-}
-
-func (e TaskState) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }

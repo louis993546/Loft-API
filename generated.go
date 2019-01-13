@@ -39,6 +39,7 @@ type ResolverRoot interface {
 	Member() MemberResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
+	Task() TaskResolver
 }
 
 type DirectiveRoot struct {
@@ -132,7 +133,7 @@ type LoftResolver interface {
 	MembersCount(ctx context.Context, obj *models.Loft) (int, error)
 	Members(ctx context.Context, obj *models.Loft) ([]models.Member, error)
 	TasksCount(ctx context.Context, obj *models.Loft) (int, error)
-	Tasks(ctx context.Context, obj *models.Loft) ([]Task, error)
+	Tasks(ctx context.Context, obj *models.Loft) ([]models.Task, error)
 	EventsCount(ctx context.Context, obj *models.Loft) (int, error)
 	Events(ctx context.Context, obj *models.Loft) ([]Event, error)
 	Notes(ctx context.Context, obj *models.Loft) ([]Note, error)
@@ -144,7 +145,7 @@ type MemberResolver interface {
 	ApprovedBy(ctx context.Context, obj *models.Member) (*models.Member, error)
 }
 type MutationResolver interface {
-	CreateTask(ctx context.Context, input NewTask) (Task, error)
+	CreateTask(ctx context.Context, input NewTask) (models.Task, error)
 	CreateEvent(ctx context.Context, input NewEvent) (Event, error)
 	CreateRequest(ctx context.Context, input NewRequest) (JoinRequest, error)
 	CreateLoft(ctx context.Context, input NewLoft) (models.Loft, error)
@@ -154,6 +155,10 @@ type QueryResolver interface {
 	Lofts(ctx context.Context) ([]models.Loft, error)
 	Loft(ctx context.Context, id uuid.UUID) (*models.Loft, error)
 	Echo(ctx context.Context) (Echo, error)
+}
+type TaskResolver interface {
+	Creator(ctx context.Context, obj *models.Task) (models.Member, error)
+	Assignee(ctx context.Context, obj *models.Task) (*models.Member, error)
 }
 
 func field_Mutation_createTask_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
@@ -1584,7 +1589,7 @@ func (ec *executionContext) _Loft_tasks(ctx context.Context, field graphql.Colle
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]Task)
+	res := resTmp.([]models.Task)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
@@ -2211,7 +2216,7 @@ func (ec *executionContext) _Mutation_createTask(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.(Task)
+	res := resTmp.(models.Task)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
@@ -2788,9 +2793,10 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 var taskImplementors = []string{"Task"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _Task(ctx context.Context, sel ast.SelectionSet, obj *Task) graphql.Marshaler {
+func (ec *executionContext) _Task(ctx context.Context, sel ast.SelectionSet, obj *models.Task) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, taskImplementors)
 
+	var wg sync.WaitGroup
 	out := graphql.NewOrderedMap(len(fields))
 	invalid := false
 	for i, field := range fields {
@@ -2820,19 +2826,27 @@ func (ec *executionContext) _Task(ctx context.Context, sel ast.SelectionSet, obj
 				invalid = true
 			}
 		case "creator":
-			out.Values[i] = ec._Task_creator(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Task_creator(ctx, field, obj)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
 		case "Assignee":
-			out.Values[i] = ec._Task_Assignee(ctx, field, obj)
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Task_Assignee(ctx, field, obj)
+				wg.Done()
+			}(i, field)
 		case "dueAt":
 			out.Values[i] = ec._Task_dueAt(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-
+	wg.Wait()
 	if invalid {
 		return graphql.Null
 	}
@@ -2840,7 +2854,7 @@ func (ec *executionContext) _Task(ctx context.Context, sel ast.SelectionSet, obj
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Task_id(ctx context.Context, field graphql.CollectedField, obj *Task) graphql.Marshaler {
+func (ec *executionContext) _Task_id(ctx context.Context, field graphql.CollectedField, obj *models.Task) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -2867,7 +2881,7 @@ func (ec *executionContext) _Task_id(ctx context.Context, field graphql.Collecte
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Task_title(ctx context.Context, field graphql.CollectedField, obj *Task) graphql.Marshaler {
+func (ec *executionContext) _Task_title(ctx context.Context, field graphql.CollectedField, obj *models.Task) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -2894,7 +2908,7 @@ func (ec *executionContext) _Task_title(ctx context.Context, field graphql.Colle
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Task_state(ctx context.Context, field graphql.CollectedField, obj *Task) graphql.Marshaler {
+func (ec *executionContext) _Task_state(ctx context.Context, field graphql.CollectedField, obj *models.Task) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -2914,14 +2928,14 @@ func (ec *executionContext) _Task_state(ctx context.Context, field graphql.Colle
 		}
 		return graphql.Null
 	}
-	res := resTmp.(TaskState)
+	res := resTmp.(models.TaskState)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return res
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Task_createdAt(ctx context.Context, field graphql.CollectedField, obj *Task) graphql.Marshaler {
+func (ec *executionContext) _Task_createdAt(ctx context.Context, field graphql.CollectedField, obj *models.Task) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -2948,7 +2962,7 @@ func (ec *executionContext) _Task_createdAt(ctx context.Context, field graphql.C
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Task_creator(ctx context.Context, field graphql.CollectedField, obj *Task) graphql.Marshaler {
+func (ec *executionContext) _Task_creator(ctx context.Context, field graphql.CollectedField, obj *models.Task) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -2960,7 +2974,7 @@ func (ec *executionContext) _Task_creator(ctx context.Context, field graphql.Col
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Creator, nil
+		return ec.resolvers.Task().Creator(rctx, obj)
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -2976,7 +2990,7 @@ func (ec *executionContext) _Task_creator(ctx context.Context, field graphql.Col
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Task_Assignee(ctx context.Context, field graphql.CollectedField, obj *Task) graphql.Marshaler {
+func (ec *executionContext) _Task_Assignee(ctx context.Context, field graphql.CollectedField, obj *models.Task) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -2988,7 +3002,7 @@ func (ec *executionContext) _Task_Assignee(ctx context.Context, field graphql.Co
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Assignee, nil
+		return ec.resolvers.Task().Assignee(rctx, obj)
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -3005,7 +3019,7 @@ func (ec *executionContext) _Task_Assignee(ctx context.Context, field graphql.Co
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Task_dueAt(ctx context.Context, field graphql.CollectedField, obj *Task) graphql.Marshaler {
+func (ec *executionContext) _Task_dueAt(ctx context.Context, field graphql.CollectedField, obj *models.Task) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{

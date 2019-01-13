@@ -11,7 +11,11 @@ models:
   Loft:
     model: github.com/louistsaitszho/loft/models.Loft
   Member:
-    model: github.com/louistsaitszho/loft/models.Member   
+    model: github.com/louistsaitszho/loft/models.Member
+  Task:
+    model: github.com/louistsaitszho/loft/models.Task
+  TaskState:
+    model: github.com/louistsaitszho/loft/models.TaskState
   UUID:
     model: github.com/louistsaitszho/loft/scalars.UUIDScalar
   Timestamp:

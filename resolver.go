@@ -111,6 +111,11 @@ func (r *Resolver) Query() QueryResolver {
 	return &queryResolver{r}
 }
 
+// Task returns a resolver that is able to resolve models.Task struct
+func (r *Resolver) Task() TaskResolver {
+	return &taskResolver{r}
+}
+
 type loftResolver struct{ *Resolver }
 
 func (r *loftResolver) MembersCount(ctx context.Context, obj *models.Loft) (int, error) {
@@ -155,7 +160,7 @@ func (r *loftResolver) TasksCount(ctx context.Context, obj *models.Loft) (int, e
 	}
 	return count, nil
 }
-func (r *loftResolver) Tasks(ctx context.Context, obj *models.Loft) ([]Task, error) {
+func (r *loftResolver) Tasks(ctx context.Context, obj *models.Loft) ([]models.Task, error) {
 	panic("not implemented")
 	// rows, queryError := r.tasksStmt.Query(obj.ID)
 	// if queryError != nil {
@@ -224,7 +229,7 @@ func (r *memberResolver) ApprovedBy(ctx context.Context, obj *models.Member) (*m
 
 type mutationResolver struct{ *Resolver }
 
-func (r *mutationResolver) CreateTask(ctx context.Context, input NewTask) (Task, error) {
+func (r *mutationResolver) CreateTask(ctx context.Context, input NewTask) (models.Task, error) {
 	panic("not implemented")
 }
 func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (Event, error) {
@@ -280,4 +285,13 @@ func (r *queryResolver) Echo(ctx context.Context) (Echo, error) {
 		Format: "RFC3339",
 	}
 	return echo, nil
+}
+
+type taskResolver struct{ *Resolver }
+
+func (r *taskResolver) Creator(ctx context.Context, obj *models.Task) (models.Member, error) {
+	panic("not implemented")
+}
+func (r *taskResolver) Assignee(ctx context.Context, obj *models.Task) (*models.Member, error) {
+	panic("not implemented")
 }
