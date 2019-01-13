@@ -41,7 +41,7 @@ func NewResolver(db *sql.DB) *Resolver {
 	if tcErr != nil {
 		log.Panicf("Invalid query for task count: '%v'\n", tcErr)
 	}
-	tasksStmt, tErr := db.Prepare("SELECT t.id, t.creator_id, t.created_at, t.assignee_id, t.title, t.due_date FROM loft.task WHERE t.loft_id = $1;")
+	tasksStmt, tErr := db.Prepare("SELECT t.id, t.creator_id, t.created_at, t.assignee_id, t.title, t.due_date FROM loft.task AS t WHERE t.loft_id = $1;")
 	if tErr != nil {
 		log.Panicf("Invalid query for tasks: '%v'\n", tErr)
 	}
