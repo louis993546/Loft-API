@@ -14,3 +14,5 @@ models:
     model: github.com/louistsaitszho/loft/models.Member   
   UUID:
     model: github.com/louistsaitszho/loft/scalars.UUIDScalar
+  Timestamp:
+    model: github.com/louistsaitszho/loft/scalars.TimestampScalar
