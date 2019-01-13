@@ -91,6 +91,11 @@ func NewResolver(db *sql.DB) *Resolver {
 	}
 }
 
+// Event returns a resolver that is able to resolve models.Event struct
+func (r *Resolver) Event() EventResolver {
+	return &eventResolver{r}
+}
+
 // Loft returns a resolver that is able to resolve models.Loft struct
 func (r *Resolver) Loft() LoftResolver {
 	return &loftResolver{r}
@@ -114,6 +119,12 @@ func (r *Resolver) Query() QueryResolver {
 // Task returns a resolver that is able to resolve models.Task struct
 func (r *Resolver) Task() TaskResolver {
 	return &taskResolver{r}
+}
+
+type eventResolver struct{ *Resolver }
+
+func (r *eventResolver) Creator(ctx context.Context, obj *models.Event) (models.Member, error) {
+	panic("not implemented")
 }
 
 type loftResolver struct{ *Resolver }
@@ -198,32 +209,35 @@ func (r *loftResolver) EventsCount(ctx context.Context, obj *models.Loft) (int, 
 	}
 	return count, nil
 }
-func (r *loftResolver) Events(ctx context.Context, obj *models.Loft) ([]Event, error) {
-	panic("not implemented")
-	// rows, queryError := r.eventsStmt.Query(obj.ID)
-	// if queryError != nil {
-	// 	panic("not implemented")
-	// }
-	// defer rows.Close()
+func (r *loftResolver) Events(ctx context.Context, obj *models.Loft) ([]models.Event, error) {
+	rows, queryError := r.eventsStmt.Query(obj.ID)
+	if queryError != nil {
+		panic("not implemented")
+	}
+	defer rows.Close()
 
-	// var events []Event
-	// for rows.Next() {
-	// 	var (
+	var events []models.Event
+	for rows.Next() {
+		var (
+			id        uuid.UUID
+			title     string
+			createdAt time.Time
+			startTime *time.Time
+			endTime   *time.Time
+		)
 
-	// 	)
-
-	// 	if scanErr := rows.Scan(); scanErr != nil {
-	// 		panic("not implemented")
-	// 	}
-	// 	events = append(events, Event{
-	// 		ID: nil,
-	// 		Title: nil,
-	// 		CreatedAt: nil,
-	// 		StartTime: nil,
-	// 		EndTime: nil,
-	// 	})
-	// }
-	// return events, nil
+		if scanErr := rows.Scan(&id, &title, &createdAt, startTime, endTime); scanErr != nil {
+			panic("not implemented")
+		}
+		events = append(events, models.Event{
+			ID:        id,
+			Title:     title,
+			CreatedAt: createdAt,
+			StartTime: startTime,
+			EndTime:   endTime,
+		})
+	}
+	return events, nil
 }
 func (r *loftResolver) Notes(ctx context.Context, obj *models.Loft) ([]Note, error) {
 	panic("not implemented")
@@ -259,7 +273,7 @@ type mutationResolver struct{ *Resolver }
 func (r *mutationResolver) CreateTask(ctx context.Context, input NewTask) (models.Task, error) {
 	panic("not implemented")
 }
-func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (Event, error) {
+func (r *mutationResolver) CreateEvent(ctx context.Context, input NewEvent) (models.Event, error) {
 	panic("not implemented")
 }
 func (r *mutationResolver) CreateRequest(ctx context.Context, input NewRequest) (JoinRequest, error) {

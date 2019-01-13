@@ -17,15 +17,6 @@ type Echo struct {
 	Format string `json:"format"`
 }
 
-type Event struct {
-	ID        uuid.UUID     `json:"id"`
-	Title     string        `json:"title"`
-	Creator   models.Member `json:"creator"`
-	CreatedAt time.Time     `json:"createdAt"`
-	StartTime *time.Time    `json:"startTime"`
-	EndTime   *time.Time    `json:"endTime"`
-}
-
 type JoinRequest struct {
 	ID        uuid.UUID `json:"id"`
 	Name      string    `json:"name"`
