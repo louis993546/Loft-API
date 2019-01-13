@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"time"
 
 	"github.com/gofrs/uuid"
 	"github.com/louistsaitszho/loft/models"
@@ -17,15 +18,19 @@ type Echo struct {
 }
 
 type Event struct {
-	ID      uuid.UUID     `json:"id"`
-	Title   string        `json:"title"`
-	Creator models.Member `json:"creator"`
+	ID        uuid.UUID     `json:"id"`
+	Title     string        `json:"title"`
+	Creator   models.Member `json:"creator"`
+	CreatedAt time.Time     `json:"createdAt"`
+	StartTime *time.Time    `json:"startTime"`
+	EndTime   *time.Time    `json:"endTime"`
 }
 
 type JoinRequest struct {
-	ID      uuid.UUID `json:"id"`
-	Name    string    `json:"name"`
-	Message string    `json:"message"`
+	ID        uuid.UUID `json:"id"`
+	Name      string    `json:"name"`
+	Message   string    `json:"message"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 type LoftAndFirstMember struct {
@@ -59,18 +64,21 @@ type NewTask struct {
 }
 
 type Note struct {
-	ID      uuid.UUID     `json:"id"`
-	Creator models.Member `json:"creator"`
-	Format  NoteFormat    `json:"format"`
-	Content string        `json:"content"`
+	ID        uuid.UUID     `json:"id"`
+	Creator   models.Member `json:"creator"`
+	CreatedAt time.Time     `json:"createdAt"`
+	Format    NoteFormat    `json:"format"`
+	Content   string        `json:"content"`
 }
 
 type Task struct {
-	ID       uuid.UUID      `json:"id"`
-	Title    string         `json:"title"`
-	State    TaskState      `json:"state"`
-	Creator  models.Member  `json:"creator"`
-	Assignee *models.Member `json:"Assignee"`
+	ID        uuid.UUID      `json:"id"`
+	Title     string         `json:"title"`
+	State     TaskState      `json:"state"`
+	CreatedAt time.Time      `json:"createdAt"`
+	Creator   models.Member  `json:"creator"`
+	Assignee  *models.Member `json:"Assignee"`
+	DueAt     *time.Time     `json:"dueAt"`
 }
 
 type NoteFormat string

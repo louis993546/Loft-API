@@ -10,14 +10,15 @@ import "github.com/gofrs/uuid"
 // - Notes & notes count
 // - Join requests & join requests count
 type Loft struct {
-	ID        uuid.UUID
-	Name      string
-	JoinCode  string
-	CreatedAt time.Time
+	ID        uuid.UUID `json:"id"`
+	Name      string    `json:"name"`
+	JoinCode  string    `json:"join_code"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 // Member removes a big member object, so that gqlgen can only run the query when necessary
 type Member struct {
-	ID   uuid.UUID `json:"id"`
-	Name string    `json:"name"`
+	ID         uuid.UUID  `json:"id"`
+	Name       string     `json:"name"`
+	ApprovedAt *time.Time `json:"approved_at"`
 }

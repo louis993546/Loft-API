@@ -91,10 +91,12 @@ func NewResolver(db *sql.DB) *Resolver {
 	}
 }
 
-// Loft returns a resolver that is able to resolve struct Loft
+// Loft returns a resolver that is able to resolve models.Loft struct
 func (r *Resolver) Loft() LoftResolver {
 	return &loftResolver{r}
 }
+
+// Member returns a resolver that is able to resolve models.Member struct
 func (r *Resolver) Member() MemberResolver {
 	return &memberResolver{r}
 }

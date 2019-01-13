@@ -8,6 +8,7 @@ import (
 	"errors"
 	"strconv"
 	"sync"
+	"time"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
@@ -50,21 +51,26 @@ type ComplexityRoot struct {
 	}
 
 	Event struct {
-		Id      func(childComplexity int) int
-		Title   func(childComplexity int) int
-		Creator func(childComplexity int) int
+		Id        func(childComplexity int) int
+		Title     func(childComplexity int) int
+		Creator   func(childComplexity int) int
+		CreatedAt func(childComplexity int) int
+		StartTime func(childComplexity int) int
+		EndTime   func(childComplexity int) int
 	}
 
 	JoinRequest struct {
-		Id      func(childComplexity int) int
-		Name    func(childComplexity int) int
-		Message func(childComplexity int) int
+		Id        func(childComplexity int) int
+		Name      func(childComplexity int) int
+		Message   func(childComplexity int) int
+		CreatedAt func(childComplexity int) int
 	}
 
 	Loft struct {
 		Id                func(childComplexity int) int
 		Name              func(childComplexity int) int
 		JoinCode          func(childComplexity int) int
+		CreatedAt         func(childComplexity int) int
 		MembersCount      func(childComplexity int) int
 		Members           func(childComplexity int) int
 		TasksCount        func(childComplexity int) int
@@ -85,6 +91,7 @@ type ComplexityRoot struct {
 	Member struct {
 		Id         func(childComplexity int) int
 		Name       func(childComplexity int) int
+		ApprovedAt func(childComplexity int) int
 		ApprovedBy func(childComplexity int) int
 	}
 
@@ -97,10 +104,11 @@ type ComplexityRoot struct {
 	}
 
 	Note struct {
-		Id      func(childComplexity int) int
-		Creator func(childComplexity int) int
-		Format  func(childComplexity int) int
-		Content func(childComplexity int) int
+		Id        func(childComplexity int) int
+		Creator   func(childComplexity int) int
+		CreatedAt func(childComplexity int) int
+		Format    func(childComplexity int) int
+		Content   func(childComplexity int) int
 	}
 
 	Query struct {
@@ -110,11 +118,13 @@ type ComplexityRoot struct {
 	}
 
 	Task struct {
-		Id       func(childComplexity int) int
-		Title    func(childComplexity int) int
-		State    func(childComplexity int) int
-		Creator  func(childComplexity int) int
-		Assignee func(childComplexity int) int
+		Id        func(childComplexity int) int
+		Title     func(childComplexity int) int
+		State     func(childComplexity int) int
+		CreatedAt func(childComplexity int) int
+		Creator   func(childComplexity int) int
+		Assignee  func(childComplexity int) int
+		DueAt     func(childComplexity int) int
 	}
 }
 
@@ -334,6 +344,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Event.Creator(childComplexity), true
 
+	case "Event.createdAt":
+		if e.complexity.Event.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.Event.CreatedAt(childComplexity), true
+
+	case "Event.startTime":
+		if e.complexity.Event.StartTime == nil {
+			break
+		}
+
+		return e.complexity.Event.StartTime(childComplexity), true
+
+	case "Event.endTime":
+		if e.complexity.Event.EndTime == nil {
+			break
+		}
+
+		return e.complexity.Event.EndTime(childComplexity), true
+
 	case "JoinRequest.id":
 		if e.complexity.JoinRequest.Id == nil {
 			break
@@ -355,6 +386,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.JoinRequest.Message(childComplexity), true
 
+	case "JoinRequest.createdAt":
+		if e.complexity.JoinRequest.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.JoinRequest.CreatedAt(childComplexity), true
+
 	case "Loft.id":
 		if e.complexity.Loft.Id == nil {
 			break
@@ -375,6 +413,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Loft.JoinCode(childComplexity), true
+
+	case "Loft.createdAt":
+		if e.complexity.Loft.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.Loft.CreatedAt(childComplexity), true
 
 	case "Loft.membersCount":
 		if e.complexity.Loft.MembersCount == nil {
@@ -474,6 +519,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Member.Name(childComplexity), true
 
+	case "Member.approvedAt":
+		if e.complexity.Member.ApprovedAt == nil {
+			break
+		}
+
+		return e.complexity.Member.ApprovedAt(childComplexity), true
+
 	case "Member.approvedBy":
 		if e.complexity.Member.ApprovedBy == nil {
 			break
@@ -555,6 +607,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Note.Creator(childComplexity), true
 
+	case "Note.createdAt":
+		if e.complexity.Note.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.Note.CreatedAt(childComplexity), true
+
 	case "Note.format":
 		if e.complexity.Note.Format == nil {
 			break
@@ -616,6 +675,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Task.State(childComplexity), true
 
+	case "Task.createdAt":
+		if e.complexity.Task.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.Task.CreatedAt(childComplexity), true
+
 	case "Task.creator":
 		if e.complexity.Task.Creator == nil {
 			break
@@ -629,6 +695,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Task.Assignee(childComplexity), true
+
+	case "Task.dueAt":
+		if e.complexity.Task.DueAt == nil {
+			break
+		}
+
+		return e.complexity.Task.DueAt(childComplexity), true
 
 	}
 	return 0, false
@@ -794,6 +867,15 @@ func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "createdAt":
+			out.Values[i] = ec._Event_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "startTime":
+			out.Values[i] = ec._Event_startTime(ctx, field, obj)
+		case "endTime":
+			out.Values[i] = ec._Event_endTime(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -887,6 +969,89 @@ func (ec *executionContext) _Event_creator(ctx context.Context, field graphql.Co
 	return ec._Member(ctx, field.Selections, &res)
 }
 
+// nolint: vetshadow
+func (ec *executionContext) _Event_createdAt(ctx context.Context, field graphql.CollectedField, obj *Event) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Event",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return scalars.MarshalTimestampScalar(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Event_startTime(ctx context.Context, field graphql.CollectedField, obj *Event) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Event",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.StartTime, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+	return scalars.MarshalTimestampScalar(*res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Event_endTime(ctx context.Context, field graphql.CollectedField, obj *Event) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Event",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.EndTime, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+	return scalars.MarshalTimestampScalar(*res)
+}
+
 var joinRequestImplementors = []string{"JoinRequest"}
 
 // nolint: gocyclo, errcheck, gas, goconst
@@ -913,6 +1078,11 @@ func (ec *executionContext) _JoinRequest(ctx context.Context, sel ast.SelectionS
 			}
 		case "message":
 			out.Values[i] = ec._JoinRequest_message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "createdAt":
+			out.Values[i] = ec._JoinRequest_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -1008,6 +1178,33 @@ func (ec *executionContext) _JoinRequest_message(ctx context.Context, field grap
 	return graphql.MarshalString(res)
 }
 
+// nolint: vetshadow
+func (ec *executionContext) _JoinRequest_createdAt(ctx context.Context, field graphql.CollectedField, obj *JoinRequest) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "JoinRequest",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return scalars.MarshalTimestampScalar(res)
+}
+
 var loftImplementors = []string{"Loft"}
 
 // nolint: gocyclo, errcheck, gas, goconst
@@ -1035,6 +1232,11 @@ func (ec *executionContext) _Loft(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "joinCode":
 			out.Values[i] = ec._Loft_joinCode(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "createdAt":
+			out.Values[i] = ec._Loft_createdAt(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -1218,6 +1420,33 @@ func (ec *executionContext) _Loft_joinCode(ctx context.Context, field graphql.Co
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Loft_createdAt(ctx context.Context, field graphql.CollectedField, obj *models.Loft) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Loft",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return scalars.MarshalTimestampScalar(res)
 }
 
 // nolint: vetshadow
@@ -1771,6 +2000,8 @@ func (ec *executionContext) _Member(ctx context.Context, sel ast.SelectionSet, o
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "approvedAt":
+			out.Values[i] = ec._Member_approvedAt(ctx, field, obj)
 		case "approvedBy":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -1840,6 +2071,34 @@ func (ec *executionContext) _Member_name(ctx context.Context, field graphql.Coll
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Member_approvedAt(ctx context.Context, field graphql.CollectedField, obj *models.Member) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Member",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ApprovedAt, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+	return scalars.MarshalTimestampScalar(*res)
 }
 
 // nolint: vetshadow
@@ -2119,6 +2378,11 @@ func (ec *executionContext) _Note(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "createdAt":
+			out.Values[i] = ec._Note_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "format":
 			out.Values[i] = ec._Note_format(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -2193,6 +2457,33 @@ func (ec *executionContext) _Note_creator(ctx context.Context, field graphql.Col
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._Member(ctx, field.Selections, &res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Note_createdAt(ctx context.Context, field graphql.CollectedField, obj *Note) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Note",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return scalars.MarshalTimestampScalar(res)
 }
 
 // nolint: vetshadow
@@ -2523,6 +2814,11 @@ func (ec *executionContext) _Task(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "createdAt":
+			out.Values[i] = ec._Task_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "creator":
 			out.Values[i] = ec._Task_creator(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -2530,6 +2826,8 @@ func (ec *executionContext) _Task(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "Assignee":
 			out.Values[i] = ec._Task_Assignee(ctx, field, obj)
+		case "dueAt":
+			out.Values[i] = ec._Task_dueAt(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2623,6 +2921,33 @@ func (ec *executionContext) _Task_state(ctx context.Context, field graphql.Colle
 }
 
 // nolint: vetshadow
+func (ec *executionContext) _Task_createdAt(ctx context.Context, field graphql.CollectedField, obj *Task) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Task",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return scalars.MarshalTimestampScalar(res)
+}
+
+// nolint: vetshadow
 func (ec *executionContext) _Task_creator(ctx context.Context, field graphql.CollectedField, obj *Task) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -2677,6 +3002,34 @@ func (ec *executionContext) _Task_Assignee(ctx context.Context, field graphql.Co
 	}
 
 	return ec._Member(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Task_dueAt(ctx context.Context, field graphql.CollectedField, obj *Task) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Task",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DueAt, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+	return scalars.MarshalTimestampScalar(*res)
 }
 
 var __DirectiveImplementors = []string{"__Directive"}
@@ -4274,13 +4627,13 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var parsedSchema = gqlparser.MustLoadSchema(
-	&ast.Source{Name: "schema.graphql", Input: `# scalar Date   #TODO: find out how it will be (de)serialize
-scalar UUID
+	&ast.Source{Name: "schema.graphql", Input: `scalar UUID
+scalar Timestamp
 
 type Member {
   id: UUID!
   name: String!
-  # approvedAt:
+  approvedAt: Timestamp
   approvedBy: Member
 }
 
@@ -4293,19 +4646,19 @@ type Task {
   id: UUID!
   title: String!
   state: TaskState!
-  # createdAt
+  createdAt: Timestamp!
   creator: Member!
   Assignee: Member
-  # dueAt
+  dueAt: Timestamp
 }
 
 type Event {
   id: UUID!
   title: String!
   creator: Member!
-  # createdAt
-  # startTime
-  # endTime
+  createdAt: Timestamp!
+  startTime: Timestamp
+  endTime: Timestamp
 }
 
 enum NoteFormat {
@@ -4315,7 +4668,7 @@ enum NoteFormat {
 type Note {
   id: UUID!
   creator: Member!,
-  # createdAt: 
+  createdAt: Timestamp!
   format: NoteFormat!,
   content: String!
 }
@@ -4324,14 +4677,14 @@ type JoinRequest {
   id: UUID!
   name: String!
   message: String!
-  # createdAt:
+  createdAt: Timestamp!
 }
 
 type Loft {
   id: UUID!
   name: String!
   joinCode: String!
-  # createdAt:
+  createdAt: Timestamp!
   membersCount: Int!
   members: [Member!]!
   tasksCount: Int!
