@@ -35,6 +35,7 @@ type Config struct {
 
 type ResolverRoot interface {
 	Loft() LoftResolver
+	Member() MemberResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
 }
@@ -119,7 +120,7 @@ type ComplexityRoot struct {
 
 type LoftResolver interface {
 	MembersCount(ctx context.Context, obj *models.Loft) (int, error)
-	Members(ctx context.Context, obj *models.Loft) ([]Member, error)
+	Members(ctx context.Context, obj *models.Loft) ([]models.Member, error)
 	TasksCount(ctx context.Context, obj *models.Loft) (int, error)
 	Tasks(ctx context.Context, obj *models.Loft) ([]Task, error)
 	EventsCount(ctx context.Context, obj *models.Loft) (int, error)
@@ -128,6 +129,9 @@ type LoftResolver interface {
 	NotesCount(ctx context.Context, obj *models.Loft) (int, error)
 	JoinRequestsCount(ctx context.Context, obj *models.Loft) (int, error)
 	JoinRequests(ctx context.Context, obj *models.Loft) ([]JoinRequest, error)
+}
+type MemberResolver interface {
+	ApprovedBy(ctx context.Context, obj *models.Member) (*models.Member, error)
 }
 type MutationResolver interface {
 	CreateTask(ctx context.Context, input NewTask) (Task, error)
@@ -876,7 +880,7 @@ func (ec *executionContext) _Event_creator(ctx context.Context, field graphql.Co
 		}
 		return graphql.Null
 	}
-	res := resTmp.(Member)
+	res := resTmp.(models.Member)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
@@ -1264,7 +1268,7 @@ func (ec *executionContext) _Loft_members(ctx context.Context, field graphql.Col
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]Member)
+	res := resTmp.([]models.Member)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
@@ -1735,7 +1739,7 @@ func (ec *executionContext) _LoftAndFirstMember_firstMember(ctx context.Context,
 		}
 		return graphql.Null
 	}
-	res := resTmp.(Member)
+	res := resTmp.(models.Member)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
@@ -1745,9 +1749,10 @@ func (ec *executionContext) _LoftAndFirstMember_firstMember(ctx context.Context,
 var memberImplementors = []string{"Member"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _Member(ctx context.Context, sel ast.SelectionSet, obj *Member) graphql.Marshaler {
+func (ec *executionContext) _Member(ctx context.Context, sel ast.SelectionSet, obj *models.Member) graphql.Marshaler {
 	fields := graphql.CollectFields(ctx, sel, memberImplementors)
 
+	var wg sync.WaitGroup
 	out := graphql.NewOrderedMap(len(fields))
 	invalid := false
 	for i, field := range fields {
@@ -1767,12 +1772,16 @@ func (ec *executionContext) _Member(ctx context.Context, sel ast.SelectionSet, o
 				invalid = true
 			}
 		case "approvedBy":
-			out.Values[i] = ec._Member_approvedBy(ctx, field, obj)
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Member_approvedBy(ctx, field, obj)
+				wg.Done()
+			}(i, field)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-
+	wg.Wait()
 	if invalid {
 		return graphql.Null
 	}
@@ -1780,7 +1789,7 @@ func (ec *executionContext) _Member(ctx context.Context, sel ast.SelectionSet, o
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Member_id(ctx context.Context, field graphql.CollectedField, obj *Member) graphql.Marshaler {
+func (ec *executionContext) _Member_id(ctx context.Context, field graphql.CollectedField, obj *models.Member) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -1807,7 +1816,7 @@ func (ec *executionContext) _Member_id(ctx context.Context, field graphql.Collec
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Member_name(ctx context.Context, field graphql.CollectedField, obj *Member) graphql.Marshaler {
+func (ec *executionContext) _Member_name(ctx context.Context, field graphql.CollectedField, obj *models.Member) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -1834,7 +1843,7 @@ func (ec *executionContext) _Member_name(ctx context.Context, field graphql.Coll
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Member_approvedBy(ctx context.Context, field graphql.CollectedField, obj *Member) graphql.Marshaler {
+func (ec *executionContext) _Member_approvedBy(ctx context.Context, field graphql.CollectedField, obj *models.Member) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -1846,12 +1855,12 @@ func (ec *executionContext) _Member_approvedBy(ctx context.Context, field graphq
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.ApprovedBy, nil
+		return ec.resolvers.Member().ApprovedBy(rctx, obj)
 	})
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*Member)
+	res := resTmp.(*models.Member)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
@@ -2179,7 +2188,7 @@ func (ec *executionContext) _Note_creator(ctx context.Context, field graphql.Col
 		}
 		return graphql.Null
 	}
-	res := resTmp.(Member)
+	res := resTmp.(models.Member)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
@@ -2634,7 +2643,7 @@ func (ec *executionContext) _Task_creator(ctx context.Context, field graphql.Col
 		}
 		return graphql.Null
 	}
-	res := resTmp.(Member)
+	res := resTmp.(models.Member)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
@@ -2659,7 +2668,7 @@ func (ec *executionContext) _Task_Assignee(ctx context.Context, field graphql.Co
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*Member)
+	res := resTmp.(*models.Member)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 

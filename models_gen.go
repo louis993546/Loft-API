@@ -17,9 +17,9 @@ type Echo struct {
 }
 
 type Event struct {
-	ID      uuid.UUID `json:"id"`
-	Title   string    `json:"title"`
-	Creator Member    `json:"creator"`
+	ID      uuid.UUID     `json:"id"`
+	Title   string        `json:"title"`
+	Creator models.Member `json:"creator"`
 }
 
 type JoinRequest struct {
@@ -29,14 +29,8 @@ type JoinRequest struct {
 }
 
 type LoftAndFirstMember struct {
-	Loft        models.Loft `json:"loft"`
-	FirstMember Member      `json:"firstMember"`
-}
-
-type Member struct {
-	ID         uuid.UUID `json:"id"`
-	Name       string    `json:"name"`
-	ApprovedBy *Member   `json:"approvedBy"`
+	Loft        models.Loft   `json:"loft"`
+	FirstMember models.Member `json:"firstMember"`
 }
 
 type NewEvent struct {
@@ -65,18 +59,18 @@ type NewTask struct {
 }
 
 type Note struct {
-	ID      uuid.UUID  `json:"id"`
-	Creator Member     `json:"creator"`
-	Format  NoteFormat `json:"format"`
-	Content string     `json:"content"`
+	ID      uuid.UUID     `json:"id"`
+	Creator models.Member `json:"creator"`
+	Format  NoteFormat    `json:"format"`
+	Content string        `json:"content"`
 }
 
 type Task struct {
-	ID       uuid.UUID `json:"id"`
-	Title    string    `json:"title"`
-	State    TaskState `json:"state"`
-	Creator  Member    `json:"creator"`
-	Assignee *Member   `json:"Assignee"`
+	ID       uuid.UUID      `json:"id"`
+	Title    string         `json:"title"`
+	State    TaskState      `json:"state"`
+	Creator  models.Member  `json:"creator"`
+	Assignee *models.Member `json:"Assignee"`
 }
 
 type NoteFormat string

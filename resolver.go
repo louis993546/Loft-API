@@ -33,7 +33,7 @@ func NewResolver(db *sql.DB) *Resolver {
 	if mcErr != nil {
 		log.Panicf("Invalid query for member count: '%v'\n", mcErr)
 	}
-	membersStmt, mErr := db.Prepare("SELECT m.id, m.name, m.approved_at, m.approved_by_member_id, m.join_request_id FROM loft.member AS m WHERE m.loft_id = $1;")
+	membersStmt, mErr := db.Prepare("SELECT m.id, m.name, m.approved_at, m.join_request_id FROM loft.member AS m WHERE m.loft_id = $1;")
 	if mErr != nil {
 		log.Panicf("Invalid query for members: '%v'\n", mErr)
 	}
@@ -95,6 +95,9 @@ func NewResolver(db *sql.DB) *Resolver {
 func (r *Resolver) Loft() LoftResolver {
 	return &loftResolver{r}
 }
+func (r *Resolver) Member() MemberResolver {
+	return &memberResolver{r}
+}
 
 // Mutation returns a resolver that is able to resolve mutations
 func (r *Resolver) Mutation() MutationResolver {
@@ -116,30 +119,28 @@ func (r *loftResolver) MembersCount(ctx context.Context, obj *models.Loft) (int,
 	}
 	return count, nil
 }
-func (r *loftResolver) Members(ctx context.Context, obj *models.Loft) ([]Member, error) {
+func (r *loftResolver) Members(ctx context.Context, obj *models.Loft) ([]models.Member, error) {
 	rows, queryError := r.membersStmt.Query(obj.ID)
 	if queryError != nil {
 		panic("not implemented: maybe 404, maybe 5XX, etc")
 	}
 	defer rows.Close()
 
-	var members []Member
+	var members []models.Member
 	for rows.Next() {
 		var (
-			id                 uuid.UUID
-			name               string
-			approvedAt         string
-			approvedByMemberID uuid.UUID
-			joinRequestID      uuid.UUID
+			id            uuid.UUID
+			name          string
+			approvedAt    string
+			joinRequestID uuid.UUID
 		)
 
-		if scanErr := rows.Scan(&id, &name, &approvedAt, &approvedByMemberID, &joinRequestID); scanErr != nil {
+		if scanErr := rows.Scan(&id, &name, &approvedAt, &joinRequestID); scanErr != nil {
 			panic("not implemented")
 		}
-		members = append(members, Member{
-			ID:         id,
-			Name:       name,
-			ApprovedBy: nil, //TODO: need another resolver
+		members = append(members, models.Member{
+			ID:   id,
+			Name: name,
 		})
 	}
 	return members, nil
@@ -186,6 +187,12 @@ func (r *loftResolver) JoinRequestsCount(ctx context.Context, obj *models.Loft) 
 	return count, nil
 }
 func (r *loftResolver) JoinRequests(ctx context.Context, obj *models.Loft) ([]JoinRequest, error) {
+	panic("not implemented")
+}
+
+type memberResolver struct{ *Resolver }
+
+func (r *memberResolver) ApprovedBy(ctx context.Context, obj *models.Member) (*models.Member, error) {
 	panic("not implemented")
 }
 
