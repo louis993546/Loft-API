@@ -1,10 +1,10 @@
-# scalar Date   #TODO: find out how it will be (de)serialize
 scalar UUID
+scalar Timestamp
 
 type Member {
   id: UUID!
   name: String!
-  # approvedAt:
+  approvedAt: Timestamp
   approvedBy: Member
 }
 
@@ -17,19 +17,19 @@ type Task {
   id: UUID!
   title: String!
   state: TaskState!
-  # createdAt
+  createdAt: Timestamp!
   creator: Member!
   Assignee: Member
-  # dueAt
+  dueAt: Timestamp
 }
 
 type Event {
   id: UUID!
   title: String!
   creator: Member!
-  # createdAt
-  # startTime
-  # endTime
+  createdAt: Timestamp!
+  startTime: Timestamp
+  endTime: Timestamp
 }
 
 enum NoteFormat {
@@ -39,7 +39,7 @@ enum NoteFormat {
 type Note {
   id: UUID!
   creator: Member!,
-  # createdAt: 
+  createdAt: Timestamp!
   format: NoteFormat!,
   content: String!
 }
@@ -48,14 +48,14 @@ type JoinRequest {
   id: UUID!
   name: String!
   message: String!
-  # createdAt:
+  createdAt: Timestamp!
 }
 
 type Loft {
   id: UUID!
   name: String!
   joinCode: String!
-  # createdAt:
+  createdAt: Timestamp!
   membersCount: Int!
   members: [Member!]!
   tasksCount: Int!
